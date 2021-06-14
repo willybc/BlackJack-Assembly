@@ -183,8 +183,8 @@ Opc_Hit_Stand:
     call HitOrStand
     cmp cl, 0
     je pideCarta
-    ;cmp cl,1
-    ;je sePlanta
+    cmp cl,1
+    je planta1
 
 pideCarta:
     int 80h                                 ;LIMPIO PANTALLA
@@ -251,6 +251,8 @@ pideCarta:
     cmp cl, 3
     je Gano2
     jmp Opc_Hit_Stand2
+planta1:
+    je planta2
 Gano2:
     mov ah,9
     mov dx, offset ganaste
@@ -270,8 +272,9 @@ Opc_Hit_Stand2:
     call HitOrStand
     cmp cl, 0
     je pideCarta2
-    ;cmp cl,1
-    ;je sePlanta
+planta2:
+    cmp cl,1
+    je planta3
 pideCarta2:
     int 80h
     ;TERCER TURNO se la dara una carta más y se la sumará
@@ -345,7 +348,8 @@ pideCarta2:
     je Pierdo3
     cmp cl,3
     je Gano3
-    jmp sePlanta
+planta3:
+    jmp planta4
 Gano3:
     mov ah,9
     mov dx, offset ganaste
@@ -358,7 +362,7 @@ Pierdo3:
 
     jmp fin
     
-sePlanta:
+planta4:
     call salto
     ;call Impr_cont_comp
     ;mov bx, offset user_carta_1_cop
