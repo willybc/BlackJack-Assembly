@@ -29,10 +29,21 @@ user_suma_1 proc
 
     push ax
     push bx
+    push cx
     push dx
     push si
     pushf
 
+    cmp cx,2
+    je Sumo2
+
+    cmp cx,3
+    je Sumo3
+
+    cmp cx,4
+    je Sumo4
+
+Sumo2:
     mov dx, ss:[bp+4]                   ;SUMO CARTA 1
     call asciiareg
     mov dl, cl
@@ -43,7 +54,40 @@ user_suma_1 proc
     pop dx
     add dl, cl
     mov dh, dl
+    jmp Convierto
 
+Sumo3:
+    mov dx, ss:[bp+4]                   ;SUMO CARTA 1
+    call asciiareg
+    mov dl, cl
+    push dx
+
+    mov dx, ss:[bp+6]                   ;SUMO CARTA 2
+    call asciiareg
+    pop dx
+    add dl, cl
+    mov dh, dl
+    
+    push dx
+    mov dx, ss:[bp+8]                   ;SUMO CARTA 3
+    call asciiareg
+    pop dx
+    add dl, cl
+    mov dh, dl
+    jmp Convierto
+
+Sumo4:
+    mov dx, ss:[bp+4]                   ;SUMO CARTA 1
+    call asciiareg
+    mov dl, cl
+    push dx
+
+    mov dx, ss:[bp+6]                   ;SUMO CARTA 2
+    call asciiareg
+    pop dx
+    add dl, cl
+    mov dh, dl
+    
     push dx
     mov dx, ss:[bp+8]                   ;SUMO CARTA 3
     call asciiareg
@@ -51,6 +95,15 @@ user_suma_1 proc
     add dl, cl
     mov dh, dl
 
+    push dx         
+    mov dx, ss:[bp+10]                  ;SUMO CARTA 4
+    call asciiareg
+    pop dx
+    add dl,cl
+    mov dh, dl
+    jmp Convierto
+
+Convierto:
     mov bx, offset user_suma_01
     call regascii2                  ;RECIBE EN DX EL REG Y EN BX OFFSET PARA GUARDARLO
 
@@ -60,6 +113,7 @@ user_suma_1 proc
     popf
     pop si
     pop dx
+    pop cx
     pop bx
     pop ax
     pop bp

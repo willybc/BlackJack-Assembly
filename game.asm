@@ -25,9 +25,10 @@ extrn asciiareg:proc
 
     user_carta_1 db '0', 0dh, 0ah, 24h
     user_carta_2 db '0', 0dh, 0ah, 24h
-    user_carta_3 db '000', 0dh, 0ah, 24h
+    user_carta_3 db '0', 0dh, 0ah, 24h
     user_carta_4 db '0', 0dh, 0ah, 24h
 
+;CARTAS Y COPIAS
     user_carta_1_cop db '0', 0dh, 0ah, 24h
     user_carta_2_cop db '0', 0dh, 0ah, 24h
     user_carta_3_cop db '0', 0dh, 0ah, 24h
@@ -35,7 +36,15 @@ extrn asciiareg:proc
 
     user_carta_1_cop2 db '0', 0dh, 0ah, 24h
     user_carta_2_cop2 db '0', 0dh, 0ah, 24h
-    
+    user_carta_3_cop2 db '0', 0dh, 0ah, 24h
+    user_carta_4_cop2 db '0', 0dh, 0ah, 24h
+
+    user_carta_1_cop3 db '0', 0dh, 0ah, 24h
+    user_carta_2_cop3 db '0', 0dh, 0ah, 24h
+    user_carta_3_cop3 db '0', 0dh, 0ah, 24h
+    user_carta_4_cop3 db '0', 0dh, 0ah, 24h
+;/CARTAS Y COPIAS
+
     comp_carta_bit_1 db 0, 0dh, 0ah, 24h
     comp_carta_bit_2 db 0, 0dh, 0ah, 24h
     comp_carta_bit_3 db 0, 0dh, 0ah, 24h
@@ -53,6 +62,8 @@ extrn asciiareg:proc
 
     variablex db '009', 0dh, 0ah, 24h
 .code
+
+;FUNCION CREADA POR ERROR AL GENERAR CARTA NRO 2
 generateRandomNumber2 proc
     push ax
     push bx
@@ -110,6 +121,10 @@ continua:
     mov bx, offset user_carta_2
     call regascii2
 
+    mov dl, user_carta_bit_2
+    mov bx, offset user_carta_2
+    call regascii2
+
 ;GUARDO EL VALOR DE LAS CARTAS EN OTRA VARIABLE POR ERROR DE SOBRE ESCRITURA
 ;ERROR DE SOBRE ESCRITURA EN FUNCIÓN USER_SUMA_1 borra el contenido del offset que le pasas
     mov dx, offset user_carta_1
@@ -121,14 +136,12 @@ continua:
     call copioVariable
 
 ;PREPARO VARIABLES PARA FUNCION USER_SUMA_1
+    mov cx,2                      
     mov bx, offset user_carta_1
-    mov di, offset user_carta_2
-    mov si, offset user_carta_3
     push bx
+    mov di, offset user_carta_2
     push di
-    push si    
     call user_suma_1
-    pop si
     pop di
     pop bx
 
@@ -144,10 +157,8 @@ continua:
 
 ;OPCION HIT OR STAND PARA PASAR AL SEGUNDO TURNO O AL TURNO DE LA COMPUTADORA
     call HitOrStand
-    
     cmp cl, 0
     je pideCarta
-
     ;cmp cl,1
     ;je sePlanta
 
@@ -156,7 +167,7 @@ pideCarta:
     ;SEGUNDO TURNO, se le dara una carta más y se la sumará.
     ;Si es mayor a 21 pierde
     ;Si es menor a 21 tiene la opción de hit o stand
-    ;GENERO CARTA NRO 1
+    ;GENERO CARTA NRO 3
     mov di, offset user_carta_bit_3       ;Paso offset en donde quiero que guarde la carta
     push di
     call Generador_Carta
@@ -182,6 +193,7 @@ pideCarta:
 
 ;PREPARO VARIABLES PARA FUNCION USER_SUMA_1
     call salto
+    mov cx,3
     mov bx, offset user_carta_1_cop    ;uso variables copia por que las originales estan rotas
     mov di, offset user_carta_2_cop    ;uso variables copia por que las originales estan rotas
     mov si, offset user_carta_3
@@ -195,26 +207,94 @@ pideCarta:
 
 ;PREPARO VARIABLES DE LAS CARTAS PARA FUNCION IMPR_CARTA
     mov bx,3
-
     mov di, offset user_carta_1_cop2
     push di
-
     mov si, offset user_carta_2_cop2
     push si
-
     mov dx, offset user_carta_3_cop
     push dx
-
     call Impr_carta
     pop dx
     pop si
     pop di
 
 ;OPCION HIT OR STAND PARA PASAR AL SEGUNDO TURNO O AL TURNO DE LA COMPUTADORA
-    
+    call HitOrStand
+    cmp cl, 0
+    je pideCarta2
+    ;cmp cl,1
+    ;je sePlanta
 
+pideCarta2:
+    int 80h
+    ;TERCER TURNO se la dara una carta más y se la sumará
+    ;Si es mayor a 21 pierde
+    ;Si es menor a 21 tiene la opción de hit o stand
+    ;GENERO CARTA NRO 4
+    mov di, offset user_carta_bit_4       ;Paso offset en donde quiero que guarde la carta
+    push di
+    call Generador_Carta
+    pop di
+
+    mov dl, user_carta_bit_4
+    mov bx, offset user_carta_4
+    call regascii2  
+
+;GUARDO EL VALOR DE LAS CARTAS EN OTRA VARIABLE POR ERROR DE SOBRE ESCRITURA
+;ERROR DE SOBRE ESCRITURA EN FUNCIÓN USER_SUMA_1 borra el contenido del offset que le pasas
+    mov dx, offset user_carta_1_cop2
+    mov bx, offset user_carta_1_cop3
+    call copioVariable
+
+    mov dx, offset user_carta_2_cop2
+    mov bx, offset user_carta_2_cop3
+    call copioVariable
+
+    mov dx, offset user_carta_3_cop
+    mov bx, offset user_carta_3_cop3                ;user_carta_3_cop2 libre
+    call copioVariable
+    
+    mov dx, offset user_carta_4
+    mov bx, offset user_carta_4_cop3                ;user_carta_4_cop2 libre
+    call copioVariable
+
+;PREPARO VARIABLES PARA FUNCION USER_SUMA_1
+    call salto
+    mov cx,4
+    mov bx, offset user_carta_1_cop3    ;uso variables copia por que las originales estan rotas
+    push bx
+    mov di, offset user_carta_2_cop3    ;uso variables copia por que las originales estan rotas
+    push di 
+    mov si, offset user_carta_3_cop3
+    push si
+    mov dx, offset user_carta_4_cop3
+    push dx
+    call user_suma_1
+    pop dx
+    pop si
+    pop di
+    pop bx
+
+;PREPARO VARIABLES DE LAS CARTAS PARA FUNCION IMPR_CARTA
+    
+    mov di, offset user_carta_1_cop2
+    push di
+    mov si, offset user_carta_2_cop2
+    push si
+    mov dx, offset user_carta_3_cop
+    push dx
+    mov bx, offset user_carta_4
+    push bx
+
+    mov bx,4
+
+    call Impr_carta
+    pop dx
+    pop si
+    pop di
+    
 sePlanta:
-    ;call salto
+    call salto
     ;call Impr_cont_comp
     ;mov bx, offset user_carta_1_cop
     ;mov di, offset user_carta_2_cop

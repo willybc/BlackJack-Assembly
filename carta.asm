@@ -27,10 +27,6 @@
     car4_ini db "  ________  ________  ________ _________ ",0dh, 0ah, 24h
     car4_mid db " |        |         |         |         |",0dh, 0ah, 24h
     car4_fin db " |________| ________| ________|_________|",0dh, 0ah, 24h
-    num_player_1 db "001", 24h
-    num_player_2 db "002", 24h
-    num_player_3 db "003", 24h
-    num_player_4 db "004", 24h
 
     imp_cart_00 db " | ",24h
     imp_cart_01 db "    | ",24h
@@ -41,7 +37,7 @@
     imp_cart_002 db "     |",0dh,0ah, 24h
 
     imp_cart_0000 db " | ",24h
-    imp_cart_0001 db "     | ",24h
+    imp_cart_0001 db "    | ",24h
     imp_cart_0002 db "     |",0dh,0ah, 24h
     ;/Impresion Carta #2
 .code
@@ -57,26 +53,6 @@ Impr_carta proc
     push si
     pushf
 
-    cmp bx, 2
-    je tengo2
-
-    cmp bx, 3
-    je tengo3
-
-tengo2:
-    mov di, ss:[bp+4]       
-    mov si, ss:[bp+6]
-    jmp Empiezo
-
-tengo3:
-    mov di, ss:[bp+4]       
-    push di                 
-    mov di, ss:[bp+6]
-    mov si, ss:[bp+8]
-    jmp Empiezo
-    
-    
-Empiezo:
     mov cx, 7 ;Cantidad de columnas de la carta
 
     cmp bx, 2
@@ -112,7 +88,7 @@ cant_4:
         int 21h
 
         mov ah,9                        ;IMPRIMO NUM 1RA CARTA
-        mov dx, offset di
+        mov dx, ss:[bp+4]
         int 21h
 
         mov ah,9
@@ -120,7 +96,7 @@ cant_4:
         int 21h
 
         mov ah,9                        ;IMPRIMO NUM 2DA CARTA
-        mov dx, offset si
+        mov dx, ss:[bp+6]
         int 21h
 
         mov ah,9 
@@ -169,10 +145,8 @@ cant_4:
         mov dx, offset imp_cart_001
         int 21h
 
-        ;-------------------------------------------------------------
-        pop di
         mov ah,9                        ;IMPRIMO NUM 3DA CARTA
-        mov dx, offset di
+        mov dx, ss:[bp+4]
         int 21h
 
         mov ah,9 
@@ -199,11 +173,11 @@ cant_4:
 
     Imp_num_c4:
         mov ah,9
-        mov dx, offset imp_cart_00
+        mov dx, offset imp_cart_0000
         int 21h
 
         mov ah,9                        ;IMPRIMO NUM 1RA CARTA
-        mov dx, offset num_player_1
+        mov dx, ss:[bp+8] 
         int 21h
 
         mov ah,9
@@ -211,7 +185,7 @@ cant_4:
         int 21h
 
         mov ah,9                        ;IMPRIMO NUM 2RA CARTA
-        mov dx, offset num_player_2
+        mov dx, ss:[bp+10] 
         int 21h
 
         mov ah,2
@@ -219,11 +193,11 @@ cant_4:
         int 21h
 
         mov ah,9
-        mov dx, offset imp_cart_01
+        mov dx, offset imp_cart_0001
         int 21h
 
-        mov ah,9                        ;IMPRIMO NUM 2RA CARTA
-        mov dx, offset num_player_3
+        mov ah,9                        ;IMPRIMO NUM 3RA CARTA
+        mov dx, ss:[bp+6]
         int 21h
 
         mov ah,2
@@ -231,21 +205,21 @@ cant_4:
         int 21h
 
         mov ah,9
-        mov dx, offset imp_cart_01
+        mov dx, offset imp_cart_0001
         int 21h
 
-        mov ah,9                        ;IMPRIMO NUM 3DA CARTA
-        mov dx, offset num_player_4
+        mov ah,9                        ;IMPRIMO NUM 4DA CARTA
+        mov dx, ss:[bp+4]
         int 21h
 
         mov ah,9 
-        mov dx, offset imp_cart_02
+        mov dx, offset imp_cart_0002
         int 21h
 
     loop ciclo_4
 
     ciclo_4:
-        cmp cx, 7
+        cmp cx, 6
         je Imp_num_c4
 
         mov ah, 9
