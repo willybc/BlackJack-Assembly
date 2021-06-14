@@ -7,7 +7,7 @@
 extrn Start_Menu:proc
 extrn salto:proc
 extrn Impr_cont_player:proc
-extrn user_suma_1:proc
+extrn user_suma:proc
 extrn Impr_cont_comp:proc
 extrn Impr_carta:proc
 extrn Generador_Carta:proc          ;al llamar la funcion por 2da vez te da el mismo aleatorio
@@ -61,6 +61,9 @@ extrn asciiareg:proc
     comp_carta_4_cop db '0', 0dh, 0ah, 24h
 
     variablex db '009', 0dh, 0ah, 24h
+
+    ganaste db  '                                                           GANASTE!', 0dh, 0ah, 24h
+    perdiste db '                                                           PERDISTE!', 0dh, 0ah, 24h
 .code
 
 ;FUNCION CREADA POR ERROR AL GENERAR CARTA NRO 2
@@ -121,12 +124,8 @@ continua:
     mov bx, offset user_carta_2
     call regascii2
 
-    mov dl, user_carta_bit_2
-    mov bx, offset user_carta_2
-    call regascii2
-
 ;GUARDO EL VALOR DE LAS CARTAS EN OTRA VARIABLE POR ERROR DE SOBRE ESCRITURA
-;ERROR DE SOBRE ESCRITURA EN FUNCIÓN USER_SUMA_1 borra el contenido del offset que le pasas
+;ERROR DE SOBRE ESCRITURA EN FUNCIÓN USER_SUMA borra el contenido del offset que le pasas
     mov dx, offset user_carta_1
     mov bx, offset user_carta_1_cop
     call copioVariable
@@ -135,18 +134,21 @@ continua:
     mov bx, offset user_carta_2_cop
     call copioVariable
 
-;PREPARO VARIABLES PARA FUNCION USER_SUMA_1
+;PREPARO VARIABLES PARA FUNCION USER_SUMA
+;NUMERO DE CARTAS DEL JUGADOR QUE VA A SUMAR
     mov cx,2                      
     mov bx, offset user_carta_1
     push bx
     mov di, offset user_carta_2
     push di
-    call user_suma_1
+    call user_suma
     pop di
     pop bx
 
+    push cx                         ;GUARDO EN STACK EL VALOR QUE DEVUELVE USER_SUMA
 ;PREPARO VARIABLES DE LAS CARTAS PARA FUNCION IMPR_CARTA
-    mov bx, 2                    ;NUMERO DE CARTAS DEL JUGADOR
+;NUMERO DE CARTAS DEL JUGADOR
+    mov bx, 2                       
     mov di, offset user_carta_1_cop
     mov si, offset user_carta_2_cop
     push di
@@ -154,8 +156,30 @@ continua:
     call Impr_carta
     pop di
     pop si
+;SE HABRA PASADO?, si se paso cl deberia estar en 1
+    pop cx                          ;PIDO AL STACK EL VALOR DE CL
+    cmp cl,1
+    je Pierdo
+    cmp cl,3
+    je Gano
+    jmp Opc_Hit_Stand
+Gano:
+    mov ah,9
+    mov dx, offset ganaste
+    int 21h
+
+    mov ax, 4c00h
+    int 21h
+Pierdo:
+    mov ah,9
+    mov dx, offset perdiste
+    int 21h
+
+    mov ax, 4c00h
+    int 21h
 
 ;OPCION HIT OR STAND PARA PASAR AL SEGUNDO TURNO O AL TURNO DE LA COMPUTADORA
+Opc_Hit_Stand:
     call HitOrStand
     cmp cl, 0
     je pideCarta
@@ -178,7 +202,7 @@ pideCarta:
     call regascii2             
 
 ;GUARDO EL VALOR DE LAS CARTAS EN OTRA VARIABLE POR ERROR DE SOBRE ESCRITURA
-;ERROR DE SOBRE ESCRITURA EN FUNCIÓN USER_SUMA_1 borra el contenido del offset que le pasas
+;ERROR DE SOBRE ESCRITURA EN FUNCIÓN USER_SUMA borra el contenido del offset que le pasas
     mov dx, offset user_carta_1_cop
     mov bx, offset user_carta_1_cop2
     call copioVariable
@@ -191,7 +215,8 @@ pideCarta:
     mov bx, offset user_carta_3_cop
     call copioVariable
 
-;PREPARO VARIABLES PARA FUNCION USER_SUMA_1
+;PREPARO VARIABLES PARA FUNCION USER_SUMA
+;NUMERO DE CARTAS DEL JUGADOR QUE VA A SUMAR
     call salto
     mov cx,3
     mov bx, offset user_carta_1_cop    ;uso variables copia por que las originales estan rotas
@@ -200,12 +225,14 @@ pideCarta:
     push bx
     push di    
     push si
-    call user_suma_1
+    call user_suma
     pop si
     pop di
     pop bx
 
+    push cx                         ;GUARDO EN STACK EL VALOR QUE DEVUELVE USER_SUMA
 ;PREPARO VARIABLES DE LAS CARTAS PARA FUNCION IMPR_CARTA
+;NUMERO DE CARTAS DEL JUGADOR
     mov bx,3
     mov di, offset user_carta_1_cop2
     push di
@@ -217,14 +244,34 @@ pideCarta:
     pop dx
     pop si
     pop di
+;SE HABRA PASADO?, si se paso cl deberia estar en 1
+    pop cx                          ;PIDO AL STACK EL VALOR DE CL
+    cmp cl, 1
+    je Pierdo2
+    cmp cl, 3
+    je Gano2
+    jmp Opc_Hit_Stand2
+Gano2:
+    mov ah,9
+    mov dx, offset ganaste
+    int 21h
 
+    mov ax, 4c00h
+    int 21h
+Pierdo2:
+    mov ah,9
+    mov dx, offset perdiste
+    int 21h
+
+    mov ax, 4c00h
+    int 21h
 ;OPCION HIT OR STAND PARA PASAR AL SEGUNDO TURNO O AL TURNO DE LA COMPUTADORA
+Opc_Hit_Stand2:
     call HitOrStand
     cmp cl, 0
     je pideCarta2
     ;cmp cl,1
     ;je sePlanta
-
 pideCarta2:
     int 80h
     ;TERCER TURNO se la dara una carta más y se la sumará
@@ -239,9 +286,8 @@ pideCarta2:
     mov dl, user_carta_bit_4
     mov bx, offset user_carta_4
     call regascii2  
-
 ;GUARDO EL VALOR DE LAS CARTAS EN OTRA VARIABLE POR ERROR DE SOBRE ESCRITURA
-;ERROR DE SOBRE ESCRITURA EN FUNCIÓN USER_SUMA_1 borra el contenido del offset que le pasas
+;ERROR DE SOBRE ESCRITURA EN FUNCIÓN USER_SUMA borra el contenido del offset que le pasas
     mov dx, offset user_carta_1_cop2
     mov bx, offset user_carta_1_cop3
     call copioVariable
@@ -257,8 +303,8 @@ pideCarta2:
     mov dx, offset user_carta_4
     mov bx, offset user_carta_4_cop3                ;user_carta_4_cop2 libre
     call copioVariable
-
-;PREPARO VARIABLES PARA FUNCION USER_SUMA_1
+;PREPARO VARIABLES PARA FUNCION USER_SUMA
+;NUMERO DE CARTAS DEL JUGADOR QUE VA A SUMAR
     call salto
     mov cx,4
     mov bx, offset user_carta_1_cop3    ;uso variables copia por que las originales estan rotas
@@ -269,14 +315,14 @@ pideCarta2:
     push si
     mov dx, offset user_carta_4_cop3
     push dx
-    call user_suma_1
+    call user_suma
     pop dx
     pop si
     pop di
     pop bx
-
-;PREPARO VARIABLES DE LAS CARTAS PARA FUNCION IMPR_CARTA
     
+    push cx                         ;GUARDO EN STACK EL VALOR QUE DEVUELVE USER_SUMA
+;PREPARO VARIABLES DE LAS CARTAS PARA FUNCION IMPR_CARTA
     mov di, offset user_carta_1_cop2
     push di
     mov si, offset user_carta_2_cop2
@@ -289,9 +335,28 @@ pideCarta2:
     mov bx,4
 
     call Impr_carta
+    pop bx
     pop dx
     pop si
     pop di
+;SE HABRA PASADO?, si se paso cl deberia estar en 1
+    pop cx                          ;PIDO AL STACK EL VALOR DE CL
+    cmp cl,1
+    je Pierdo3
+    cmp cl,3
+    je Gano3
+    jmp sePlanta
+Gano3:
+    mov ah,9
+    mov dx, offset ganaste
+    int 21h
+    jmp fin
+Pierdo3:
+    mov ah,9
+    mov dx, offset perdiste
+    int 21h
+
+    jmp fin
     
 sePlanta:
     call salto

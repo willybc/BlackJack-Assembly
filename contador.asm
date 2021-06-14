@@ -14,14 +14,14 @@
 .code
 public Impr_cont_player
 public Impr_cont_comp
-public user_suma_1
+public user_suma
 
 extrn salto:proc
 
 extrn regascii2:proc
 extrn asciiareg:proc
 
-user_suma_1 proc
+user_suma proc
     ;RECIBI EN BX USER_CARTA_1
     ;RECIBI EN DI USER_CARTA_2
     push bp
@@ -29,7 +29,6 @@ user_suma_1 proc
 
     push ax
     push bx
-    push cx
     push dx
     push si
     pushf
@@ -104,21 +103,39 @@ Sumo4:
     jmp Convierto
 
 Convierto:
+    xor cx,cx
+    sePaso?:
+    cmp dh, 21
+    je ganaste
+    jg perdiste
+    jmp nosePaso
+nosePaso:
+    mov cl,0                        ; SI ES MENOR A 21, DEVUELVE 0
+    jmp empiezoConvertir 
+perdiste:
+    mov cl,1                        ; SI ES MAYOR A 21, DEVUELVE 1
+    jmp empiezoConvertir
+ganaste:
+    mov cl, 3                       ; SI ES IGUAL A 21, DEVUELVE 3
+    jmp empiezoConvertir
+   
+empiezoConvertir:
+    push cx                         ; GUARDO EN STACK VALOR CL                  
     mov bx, offset user_suma_01
-    call regascii2                  ;RECIBE EN DX EL REG Y EN BX OFFSET PARA GUARDARLO
+    call regascii2                  ; RECIBE EN DX EL REG Y EN BX OFFSET PARA GUARDARLO
 
     mov bx, offset user_suma_01
     call Impr_cont_player
 
+    pop cx                          ; PIDO A STACK EL VALOR DE CL
     popf
     pop si
     pop dx
-    pop cx
     pop bx
     pop ax
     pop bp
     ret
-user_suma_1 endp
+user_suma endp
 
 Impr_cont_player proc
     ;TXT MANO DE JUGADOR
