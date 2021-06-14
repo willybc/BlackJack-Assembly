@@ -15,15 +15,13 @@
 public Impr_cont_player
 public Impr_cont_comp
 public user_suma
+public computer_suma
 
 extrn salto:proc
-
 extrn regascii2:proc
 extrn asciiareg:proc
 
 user_suma proc
-    ;RECIBI EN BX USER_CARTA_1
-    ;RECIBI EN DI USER_CARTA_2
     push bp
     mov bp, sp
 
@@ -137,6 +135,120 @@ empiezoConvertir:
     ret
 user_suma endp
 
+computer_suma proc
+    push bp
+    mov bp, sp
+
+    push ax
+    push bx
+    push dx
+    push si
+    pushf
+
+    cmp cx,2
+    je Sumoc2
+
+    cmp cx,3
+    je Sumoc3
+
+    cmp cx,4
+    je Sumoc4
+
+Sumoc2:
+    mov dx, ss:[bp+4]                   ;SUMO CARTA 1
+    call asciiareg
+    mov dl, cl
+    push dx
+
+    mov dx, ss:[bp+6]                   ;SUMO CARTA 2
+    call asciiareg
+    pop dx
+    add dl, cl
+    mov dh, dl
+    jmp ConviertoC
+
+Sumoc3:
+    mov dx, ss:[bp+4]                   ;SUMO CARTA 1
+    call asciiareg
+    mov dl, cl
+    push dx
+
+    mov dx, ss:[bp+6]                   ;SUMO CARTA 2
+    call asciiareg
+    pop dx
+    add dl, cl
+    mov dh, dl
+    
+    push dx
+    mov dx, ss:[bp+8]                   ;SUMO CARTA 3
+    call asciiareg
+    pop dx
+    add dl, cl
+    mov dh, dl
+    jmp ConviertoC
+
+Sumoc4:
+    mov dx, ss:[bp+4]                   ;SUMO CARTA 1
+    call asciiareg
+    mov dl, cl
+    push dx
+
+    mov dx, ss:[bp+6]                   ;SUMO CARTA 2
+    call asciiareg
+    pop dx
+    add dl, cl
+    mov dh, dl
+    
+    push dx
+    mov dx, ss:[bp+8]                   ;SUMO CARTA 3
+    call asciiareg
+    pop dx
+    add dl, cl
+    mov dh, dl
+
+    push dx         
+    mov dx, ss:[bp+10]                  ;SUMO CARTA 4
+    call asciiareg
+    pop dx
+    add dl,cl
+    mov dh, dl
+    jmp ConviertoC
+
+ConviertoC:
+    xor cx,cx
+sePasoC?:
+    cmp dh, 21
+    je ganasteC
+    jg perdisteC
+    jmp nosePasoC
+nosePasoC:
+    mov cl,0                        ; SI ES MENOR A 21, DEVUELVE 0
+    jmp empiezoConvertirC
+perdisteC:
+    mov cl,1                        ; SI ES MAYOR A 21, DEVUELVE 1
+    jmp empiezoConvertirC
+ganasteC:
+    mov cl, 3                       ; SI ES IGUAL A 21, DEVUELVE 3
+    jmp empiezoConvertirC
+   
+empiezoConvertirC:
+    push cx                         ; GUARDO EN STACK VALOR CL                  
+    mov bx, offset user_suma_01
+    call regascii2                  ; RECIBE EN DX EL REG Y EN BX OFFSET PARA GUARDARLO
+
+    mov bx, offset user_suma_01
+    call Impr_cont_comp
+
+    pop cx                          ; PIDO A STACK EL VALOR DE CL
+    popf
+    pop si
+    pop dx
+    pop bx
+    pop ax
+    pop bp
+    ret
+computer_suma endp
+
 Impr_cont_player proc
     ;TXT MANO DE JUGADOR
     push ax
@@ -174,7 +286,7 @@ Impr_cont_comp proc
     int 21h
 
     mov ah,9
-    mov dx, offset comp_total
+    mov dx, offset bx
     int 21h
 
     mov ah,9
