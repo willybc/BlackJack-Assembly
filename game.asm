@@ -15,6 +15,7 @@ extrn delay:proc
 extrn copioVariable:proc 
 extrn HitOrStand:proc
 extrn computer_suma:proc
+extrn Comparo_ambas_sumas:proc
 
 extrn regascii2:proc
 extrn asciiareg:proc
@@ -778,6 +779,7 @@ PierdePC3:
     int 21h
 
 FinalizaPC:
+    call Comparo_ambas_sumas
     ;FALTA FUNCION QUE COMPARA LA   SUMA DE LAS 4 CARTAS DEL JUGADOR CON
     ;                               SUMA DE LAS 4 CARTAS DE LA COMPUTADORA
     mov ax, 4c00h

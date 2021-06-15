@@ -11,11 +11,18 @@
     comp_txt2 db " ] :",0dh, 0ah,24h
 
     user_suma_01 db '0', 0dh, 0ah, 24h
+    comp_suma_01 db '0', 0dh, 0ah, 24h
+
+    txt_user_gana db 'User Win!', 0dh, 0ah, 24h
+    txt_comp_gana db 'Computer Win!', 0dh, 0ah, 24h
+    txt_empate db 'Empate :/', 0dh, 0ah, 24h
+
 .code
 public Impr_cont_player
 public Impr_cont_comp
 public user_suma
 public computer_suma
+public Comparo_ambas_sumas
 
 extrn salto:proc
 extrn regascii2:proc
@@ -233,10 +240,10 @@ ganasteC:
    
 empiezoConvertirC:
     push cx                         ; GUARDO EN STACK VALOR CL                  
-    mov bx, offset user_suma_01
+    mov bx, offset comp_suma_01
     call regascii2                  ; RECIBE EN DX EL REG Y EN BX OFFSET PARA GUARDARLO
 
-    mov bx, offset user_suma_01
+    mov bx, offset comp_suma_01
     call Impr_cont_comp
 
     pop cx                          ; PIDO A STACK EL VALOR DE CL
@@ -249,8 +256,46 @@ empiezoConvertirC:
     ret
 computer_suma endp
 
+Comparo_ambas_sumas proc
+    mov dx, offset user_suma_01         ;GUARDO EL OFFSET EN DX
+    call asciiareg                      ;REG EN CL
+    mov dl,cl
+    push dx
+
+    mov dx, offset comp_suma_01         ;GUARDO EL OFFSET EN DX
+    call asciiareg                      ;REG EN CL
+    pop dx
+    
+    ;VALOR DE USER_SUMA_01 EN DL
+    ;VALOR DE COMP_SUMA_01 EN CL
+Comparo_sumas:
+    cmp dl, cl
+    ja usuario_gana             ;SI ES SUPERIOR USUARIO GANA
+    je nadie_gana               ;SI SON IGUALES EMPATAN
+    jb computadora_gana         ;SI ES INFERIOR COMPUTADORA GANA
+    jmp fin_comparacion
+
+usuario_gana:
+    mov ah,9
+    mov dx, offset txt_user_gana
+    int 21h
+    jmp fin_comparacion
+nadie_gana:
+    mov ah,9
+    mov dx, offset txt_empate
+    int 21h
+    jmp fin_comparacion
+computadora_gana:
+    mov ah,9
+    mov dx, offset txt_comp_gana
+    int 21h
+    jmp fin_comparacion 
+fin_comparacion:
+    ret
+Comparo_ambas_sumas endp
+
 Impr_cont_player proc
-    ;TXT MANO DE JUGADOR
+    ;TXT SUMA DE CARTAS DE JUGADOR
     push ax
     push bx
     push dx
@@ -270,17 +315,15 @@ Impr_cont_player proc
     pop dx
     pop bx
     pop ax
-
-    ;/TXT MANO DE JUGADOR
+    ;/TXT SUMA DE CARTAS DE JUGADOR
     ret
 Impr_cont_player endp
 
 Impr_cont_comp proc
-    ;TXT MANO DE COMPUTADORA
+    ;TXT SUMA DE CARTAS DE COMPUTADORA
     push ax
     push dx
     
-
     mov ah,9
     mov dx, offset comp_txt1
     int 21h
@@ -295,8 +338,7 @@ Impr_cont_comp proc
 
     pop dx
     pop ax
-
-    ;/TXT MANO DE COMPUTADORA
+    ;/TXT SUMA DE CARTAS DE COMPUTADORA
     ret
 Impr_cont_comp endp
 
