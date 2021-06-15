@@ -15,7 +15,7 @@
 
     txt_user_gana db 'User Win!', 0dh, 0ah, 24h
     txt_comp_gana db 'Computer Win!', 0dh, 0ah, 24h
-    txt_empate db 'Empate :/', 0dh, 0ah, 24h
+    txt_empate db '                                                           EMPATE :/', 0dh, 0ah, 24h
 
 .code
 public Impr_cont_player
@@ -23,6 +23,7 @@ public Impr_cont_comp
 public user_suma
 public computer_suma
 public Comparo_ambas_sumas
+public Acumulador_user_carta
 
 extrn salto:proc
 extrn regascii2:proc
@@ -142,6 +143,53 @@ empiezoConvertir:
     ret
 user_suma endp
 
+Acumulador_user_carta proc
+    push bx
+    push dx
+    pushf    
+    mov dx, offset bx
+    call asciiareg
+    mov dl,cl
+    push dx
+    
+    mov dx, offset user_suma_01
+    call asciiareg
+    pop dx
+
+    ;REG CL SUMA ANTERIOR
+    ;REG DL VALOR DE VALOR RECIBIDO
+    add dl, cl
+;HAGO COMPARACION SI PERDIO, GANO O SIGUE JUGANDO
+    xor cx,cx
+    cmp dl, 21
+    je ganaste1
+    jg perdiste1
+    jmp nosePaso1
+nosePaso1:
+    mov cl,0                        ; SI ES MENOR A 21, DEVUELVE 0
+    jmp ConviertoeImprimo 
+perdiste1:
+    mov cl,1                        ; SI ES MAYOR A 21, DEVUELVE 1
+    jmp ConviertoeImprimo
+ganaste1:
+    mov cl, 3                       ; SI ES IGUAL A 21, DEVUELVE 3
+    jmp ConviertoeImprimo
+   
+ConviertoeImprimo:
+    push cx  
+    mov bx, offset user_suma_01
+    call regascii2
+
+    mov bx, offset user_suma_01
+    call Impr_cont_player
+
+    pop cx
+    popf
+    pop dx
+    pop bx
+    ret
+Acumulador_user_carta endp
+
 computer_suma proc
     push bp
     mov bp, sp
@@ -257,6 +305,11 @@ empiezoConvertirC:
 computer_suma endp
 
 Comparo_ambas_sumas proc
+    push ax
+    push dx
+    push cx
+    pushf
+
     mov dx, offset user_suma_01         ;GUARDO EL OFFSET EN DX
     call asciiareg                      ;REG EN CL
     mov dl,cl
@@ -280,17 +333,24 @@ usuario_gana:
     mov dx, offset txt_user_gana
     int 21h
     jmp fin_comparacion
+
 nadie_gana:
     mov ah,9
     mov dx, offset txt_empate
     int 21h
     jmp fin_comparacion
+
 computadora_gana:
     mov ah,9
     mov dx, offset txt_comp_gana
     int 21h
     jmp fin_comparacion 
+
 fin_comparacion:
+    popf
+    pop cx
+    pop dx
+    pop ax
     ret
 Comparo_ambas_sumas endp
 
@@ -305,7 +365,7 @@ Impr_cont_player proc
     int 21h
 
     mov ah,9
-    mov dx, offset bx
+    mov dx, offset user_suma_01
     int 21h
 
     mov ah,9

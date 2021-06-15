@@ -16,6 +16,7 @@ extrn copioVariable:proc
 extrn HitOrStand:proc
 extrn computer_suma:proc
 extrn Comparo_ambas_sumas:proc
+extrn Acumulador_user_carta:proc
 
 extrn regascii2:proc
 extrn asciiareg:proc
@@ -35,27 +36,9 @@ extrn asciiareg:proc
     user_carta_2_cop db '0', 0dh, 0ah, 24h
     user_carta_3_cop db '0', 0dh, 0ah, 24h
     user_carta_4_cop db '0', 0dh, 0ah, 24h
-
-    user_carta_1_cop2 db '0', 0dh, 0ah, 24h
-    user_carta_2_cop2 db '0', 0dh, 0ah, 24h
-    user_carta_3_cop2 db '0', 0dh, 0ah, 24h
-    user_carta_4_cop2 db '0', 0dh, 0ah, 24h
-
-    user_carta_1_cop3 db '0', 0dh, 0ah, 24h
-    user_carta_2_cop3 db '0', 0dh, 0ah, 24h
-    user_carta_3_cop3 db '0', 0dh, 0ah, 24h
-    user_carta_4_cop3 db '0', 0dh, 0ah, 24h
+    vacio db '0', 0dh, 0ah, 24h
     
-    user_carta_1_cop4 db '0', 0dh, 0ah, 24h
-    user_carta_2_cop4 db '0', 0dh, 0ah, 24h
-    user_carta_3_cop4 db '0', 0dh, 0ah, 24h
-    user_carta_4_cop4 db '0', 0dh, 0ah, 24h
-
-    user_carta_1_cop5 db '0', 0dh, 0ah, 24h
-    user_carta_2_cop5 db '0', 0dh, 0ah, 24h
-    user_carta_3_cop5 db '0', 0dh, 0ah, 24h
-    user_carta_4_cop5 db '0', 0dh, 0ah, 24h
-
+    user_carta_4_cop2 db '0', 0dh, 0ah, 24h
 ;/CARTAS Y COPIAS USER
 
     comp_carta_bit_1 db 0, 0dh, 0ah, 24h
@@ -88,6 +71,8 @@ extrn asciiareg:proc
 
     ganaste db  '                                                           GANASTE!', 0dh, 0ah, 24h
     perdiste db '                                                           PERDISTE!', 0dh, 0ah, 24h
+    txt_gana_pc db '                                                           GANA PC ;)', 0dh, 0ah, 24h
+    txt_pierde_pc db '                                                           PIERDE PC :(',0dh, 0ah, 24h
     txt_Pause db '                                               '
     txt_Pause2 db 'Continue <Spacebar>', 0dh, 0ah, 24h
 .code
@@ -243,47 +228,25 @@ pideCarta:
     push di
     call Generador_Carta
     pop di
-
     mov dl, user_carta_bit_3
     mov bx, offset user_carta_3
-    call regascii2             
-
-;GUARDO EL VALOR DE LAS CARTAS EN OTRA VARIABLE POR ERROR DE SOBRE ESCRITURA
-;ERROR DE SOBRE ESCRITURA EN FUNCIÓN USER_SUMA borra el contenido del offset que le pasas
-    mov dx, offset user_carta_1_cop
-    mov bx, offset user_carta_1_cop2
-    call copioVariable
-
-    mov dx, offset user_carta_2_cop
-    mov bx, offset user_carta_2_cop2
-    call copioVariable
-
+    call regascii2
+    ;/GENERO CARTA NRO 3
+    ;COPIO VARIABLE PORQUE USER_CARTA_3 SE ROMPE EN ACUMULADOR_USER_CARTA
+    call salto
     mov dx, offset user_carta_3
     mov bx, offset user_carta_3_cop
-    call copioVariable
+    call copioVariable             
 
-;PREPARO VARIABLES PARA FUNCION USER_SUMA
-;NUMERO DE CARTAS DEL JUGADOR QUE VA A SUMAR
-    call salto
-    mov cx,3
-    mov bx, offset user_carta_1_cop    ;uso variables copia por que las originales estan rotas
-    mov di, offset user_carta_2_cop    ;uso variables copia por que las originales estan rotas
-    mov si, offset user_carta_3
-    push bx
-    push di    
-    push si
-    call user_suma
-    pop si
-    pop di
-    pop bx
-
-    push cx                         ;GUARDO EN STACK EL VALOR QUE DEVUELVE USER_SUMA
+    mov bx, offset user_carta_3
+    call Acumulador_user_carta
+    push cx
 ;PREPARO VARIABLES DE LAS CARTAS PARA FUNCION IMPR_CARTA
 ;NUMERO DE CARTAS DEL JUGADOR
     mov bx,3
-    mov di, offset user_carta_1_cop2
+    mov di, offset user_carta_1_cop
     push di
-    mov si, offset user_carta_2_cop2
+    mov si, offset user_carta_2_cop
     push si
     mov dx, offset user_carta_3_cop
     push dx
@@ -324,6 +287,7 @@ planta2:
     je planta3
 pideCarta2:
     int 80h
+    call salto
     ;TERCER TURNO se la dara una carta más y se la sumará
     ;Si es mayor a 21 pierde
     ;Si es menor a 21 tiene la opción de hit o stand
@@ -336,54 +300,25 @@ pideCarta2:
     mov dl, user_carta_bit_4
     mov bx, offset user_carta_4
     call regascii2  
-;GUARDO EL VALOR DE LAS CARTAS EN OTRA VARIABLE POR ERROR DE SOBRE ESCRITURA
-;ERROR DE SOBRE ESCRITURA EN FUNCIÓN USER_SUMA borra el contenido del offset que le pasas
-    mov dx, offset user_carta_1_cop2
-    mov bx, offset user_carta_1_cop3
-    call copioVariable
-
-    mov dx, offset user_carta_2_cop2
-    mov bx, offset user_carta_2_cop3
-    call copioVariable
-
-    mov dx, offset user_carta_3_cop
-    mov bx, offset user_carta_3_cop3                ;user_carta_3_cop2 libre
-    call copioVariable
-    
+    ;/GENERO CARTA NRO 4
+;COPIO VARIABLE PORQUE USER_CARTA_4 SE ROMPE EN ACUMULADOR_USER_CARTA        
     mov dx, offset user_carta_4
-    mov bx, offset user_carta_4_cop3                ;user_carta_4_cop2 libre
+    mov bx, offset user_carta_4_cop2    ;user_carta_4_cop NO FUNCIONA SE ROMPE PROGRAMA                
     call copioVariable
-;PREPARO VARIABLES PARA FUNCION USER_SUMA
-;NUMERO DE CARTAS DEL JUGADOR QUE VA A SUMAR
-    call salto
-    mov cx,4
-    mov bx, offset user_carta_1_cop3    ;uso variables copia por que las originales estan rotas
-    push bx
-    mov di, offset user_carta_2_cop3    ;uso variables copia por que las originales estan rotas
-    push di 
-    mov si, offset user_carta_3_cop3
-    push si
-    mov dx, offset user_carta_4_cop3
-    push dx
-    call user_suma
-    pop dx
-    pop si
-    pop di
-    pop bx
-    
-    push cx                         ;GUARDO EN STACK EL VALOR QUE DEVUELVE USER_SUMA
+
+    mov bx, offset user_carta_4
+    call Acumulador_user_carta
+    push cx
 ;PREPARO VARIABLES DE LAS CARTAS PARA FUNCION IMPR_CARTA
-    mov di, offset user_carta_1_cop2
+    mov di, offset user_carta_1_cop
     push di
-    mov si, offset user_carta_2_cop2
+    mov si, offset user_carta_2_cop
     push si
     mov dx, offset user_carta_3_cop
     push dx
-    mov bx, offset user_carta_4
+    mov bx, offset user_carta_4_cop2
     push bx
-
     mov bx,4
-
     call Impr_carta
     pop bx
     pop dx
@@ -498,51 +433,18 @@ ContinuaPC:
 ;---------------- S-E-G-U-N-D-O    T-U-R-N-O    PC ---------------- 
 ContinuaPC1:    
     int 80h
-    ;GUARDO EL VALOR DE LAS CARTAS EN OTRA VARIABLE POR ERROR DE SOBRE ESCRITURA
-    ;ERROR DE SOBRE ESCRITURA EN FUNCIÓN USER_SUMA borra el contenido del offset que le pasas
-    mov dx, offset user_carta_1_cop2
-    mov bx, offset user_carta_1_cop4
-    call copioVariable
-
-    mov dx, offset user_carta_2_cop2
-    mov bx, offset user_carta_2_cop4
-    call copioVariable
-
-    mov dx, offset user_carta_3_cop
-    mov bx, offset user_carta_3_cop4               ;user_carta_3_cop2 libre
-    call copioVariable
-    
-    mov dx, offset user_carta_4
-    mov bx, offset user_carta_4_cop4                ;user_carta_4_cop2 libre
-    call copioVariable
-    ;IMPRIMO DE NUEVO LA SUMA DE LAS 4 CARTAS DEL USUARIO
     call salto
-    mov cx,4
-    mov bx, offset user_carta_1_cop4   ;uso variables copia por que las originales estan rotas
-    push bx
-    mov di, offset user_carta_2_cop4    ;uso variables copia por que las originales estan rotas
-    push di 
-    mov si, offset user_carta_3_cop4
-    push si
-    mov dx, offset user_carta_4_cop4
-    push dx
-    call user_suma
-    pop dx
-    pop si
-    pop di
-    pop bx
+    call Impr_cont_player
     ;IMPRIMO DE NUEVO LAS 4 CARTAS DEL USUARIO
-    mov di, offset user_carta_1_cop2
+    mov di, offset user_carta_1_cop
     push di
-    mov si, offset user_carta_2_cop2
+    mov si, offset user_carta_2_cop
     push si
     mov dx, offset user_carta_3_cop
     push dx
-    mov bx, offset user_carta_4
+    mov bx, offset user_carta_4_cop2
     push bx
-
     mov bx,4
-
     call Impr_carta
     pop bx
     pop dx
@@ -640,52 +542,18 @@ ContinuaPC2:
 ContinuaPC3:
 ;---------------- T-E-R-C-E-R    T-U-R-N-O    PC ---------------- 
     int 80h
-    ;GUARDO EL VALOR DE LAS CARTAS EN OTRA VARIABLE POR ERROR DE SOBRE ESCRITURA
-    ;ERROR DE SOBRE ESCRITURA EN FUNCIÓN USER_SUMA borra el contenido del offset que le pasas
-    mov dx, offset user_carta_1_cop2
-    mov bx, offset user_carta_1_cop5
-    call copioVariable
-
-    mov dx, offset user_carta_2_cop2
-    mov bx, offset user_carta_2_cop5
-    call copioVariable
-
-    mov dx, offset user_carta_3_cop
-    mov bx, offset user_carta_3_cop5                 ;user_carta_3_cop2 libre
-    call copioVariable
-    
-    mov dx, offset user_carta_4
-    mov bx, offset user_carta_4_cop5                ;user_carta_4_cop2 libre
-    call copioVariable
-
-    ;IMPRIMO DE NUEVO LA SUMA DE LAS 4 CARTAS DEL USUARIO
     call salto
-    mov cx,4
-    mov bx, offset user_carta_1_cop5   ;uso variables copia por que las originales estan rotas
-    push bx
-    mov di, offset user_carta_2_cop5    ;uso variables copia por que las originales estan rotas
-    push di 
-    mov si, offset user_carta_3_cop5
-    push si
-    mov dx, offset user_carta_4_cop5
-    push dx
-    call user_suma
-    pop dx
-    pop si
-    pop di
-    pop bx
+    call Impr_cont_player
     ;IMPRIMO DE NUEVO LAS 4 CARTAS DEL USUARIO
-    mov di, offset user_carta_1_cop2
+    mov di, offset user_carta_1_cop
     push di
-    mov si, offset user_carta_2_cop2
+    mov si, offset user_carta_2_cop
     push si
     mov dx, offset user_carta_3_cop
     push dx
-    mov bx, offset user_carta_4
+    mov bx, offset user_carta_4_cop2
     push bx
-
-    mov bx,4
-
+    mov bx,4                                ;MANDO CANTIDAD DE CARTAS A IMPRIMIR
     call Impr_carta
     pop bx
     pop dx
@@ -759,29 +627,33 @@ ContinuaPC3:
     pop di
 ;SE HABRA PASADO?, si se paso cl deberia estar en 1
     pop cx                          ;PIDO AL STACK EL VALOR DE CL
-    cmp cl,1
-    je PierdePC3
     cmp cl,3
     je GanaPC3
+    
+    cmp cl,1
+    je PierdePC3    
+
     jmp FinalizaPC
 GanaPC3:
-    mov ah,9
-    mov dx, offset perdiste
+    ;SI SALTA AQUI ES PORQUE ES IGUAL A 21
+    mov ah, 9
+    mov dx, offset txt_gana_pc
     int 21h
     
     mov ax, 4c00h
     int 21h
 PierdePC3:
-    mov ah,9
-    mov dx, offset ganaste
+    ;SI SALTA AQUI ES POR QUE ES MAYOR A 21
+    mov ah, 9
+    mov dx, offset txt_pierde_pc
     int 21h
+
     mov ax, 4c00h
     int 21h
 
 FinalizaPC:
     call Comparo_ambas_sumas
-    ;FALTA FUNCION QUE COMPARA LA   SUMA DE LAS 4 CARTAS DEL JUGADOR CON
-    ;                               SUMA DE LAS 4 CARTAS DE LA COMPUTADORA
+    
     mov ax, 4c00h
     int 21h
 
