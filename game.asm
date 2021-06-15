@@ -17,6 +17,7 @@ extrn HitOrStand:proc
 extrn computer_suma:proc
 extrn Comparo_ambas_sumas:proc
 extrn Acumulador_user_carta:proc
+extrn Acumulador_comp_carta:proc 
 
 extrn regascii2:proc
 extrn asciiareg:proc
@@ -35,9 +36,7 @@ extrn asciiareg:proc
     user_carta_1_cop db '0', 0dh, 0ah, 24h
     user_carta_2_cop db '0', 0dh, 0ah, 24h
     user_carta_3_cop db '0', 0dh, 0ah, 24h
-    user_carta_4_cop db '0', 0dh, 0ah, 24h
-    vacio db '0', 0dh, 0ah, 24h
-    
+    user_carta_4_cop db '0', 0dh, 0ah, 24h    
     user_carta_4_cop2 db '0', 0dh, 0ah, 24h
 ;/CARTAS Y COPIAS USER
 
@@ -56,16 +55,7 @@ extrn asciiareg:proc
     comp_carta_2_cop db '0', 0dh, 0ah, 24h
     comp_carta_3_cop db '0', 0dh, 0ah, 24h
     comp_carta_4_cop db '0', 0dh, 0ah, 24h
-
-    comp_carta_1_cop2 db '0', 0dh, 0ah, 24h
-    comp_carta_2_cop2 db '0', 0dh, 0ah, 24h
-    comp_carta_3_cop2 db '0', 0dh, 0ah, 24h
     comp_carta_4_cop2 db '0', 0dh, 0ah, 24h
-
-    comp_carta_1_cop3 db '0', 0dh, 0ah, 24h
-    comp_carta_2_cop3 db '0', 0dh, 0ah, 24h
-    comp_carta_3_cop3 db '0', 0dh, 0ah, 24h
-    comp_carta_4_cop3 db '0', 0dh, 0ah, 24h
 ;/CARTAS Y COPIAS COMPUTER
     variablex db '009', 0dh, 0ah, 24h
 
@@ -347,7 +337,6 @@ Pierdo3:
     int 21h
 TurnoPC:
 ;---------------- P-R-I-M-E-R    T-U-R-N-O    PC ---------------- 
-    call salto
     ;GENERO CARTA NRO 1 COMPUTADORA
     mov di, offset comp_carta_bit_1       ;Paso offset en donde quiero que guarde la carta
     push di
@@ -459,45 +448,23 @@ ContinuaPC1:
     mov dl, comp_carta_bit_3
     mov bx, offset comp_carta_3
     call regascii2   
-
-    ;GUARDO EL VALOR DE LAS CARTAS EN OTRA VARIABLE POR ERROR DE SOBRE ESCRITURA
-    ;ERROR DE SOBRE ESCRITURA EN FUNCIÓN USER_SUMA borra el contenido del offset que le pasas
-    mov dx, offset comp_carta_1_cop
-    mov bx, offset comp_carta_1_cop2
-    call copioVariable
-
-    mov dx, offset comp_carta_2_cop
-    mov bx, offset comp_carta_2_cop2
-    call copioVariable
-
+    ;/GENERO CARTA NRO 3 COMPUTADORA
+    ;COPIO VARIABLE PORQUE USER_CARTA_3 SE ROMPE EN ACUMULADOR_COMP_CARTA
+    call salto
     mov dx, offset comp_carta_3
     mov bx, offset comp_carta_3_cop
     call copioVariable   
 
-    ;PREPARO VARIABLES PARA FUNCION COMPUTER_SUMA
-    ;NUMERO DE CARTAS DEL COMPUTADORA QUE VA A SUMAR
-    call salto
-    call salto
-    mov cx,3
-    mov bx, offset comp_carta_1_cop    ;uso variables copia por que las originales estan rotas
-    mov di, offset comp_carta_2_cop    ;uso variables copia por que las originales estan rotas
-    mov si, offset comp_carta_3
-    push bx
-    push di    
-    push si
-    call computer_suma
-    pop si
-    pop di
-    pop bx
-
-    push cx  
+    mov bx, offset comp_carta_3
+    call Acumulador_comp_carta
+    push cx 
 
 ;PREPARO VARIABLES DE LAS CARTAS PARA FUNCION IMPR_CARTA
 ;NUMERO DE CARTAS DE LA COMPUTADORA
     mov bx,3
-    mov di, offset comp_carta_1_cop2
+    mov di, offset comp_carta_1_cop
     push di
-    mov si, offset comp_carta_2_cop2
+    mov si, offset comp_carta_2_cop
     push si
     mov dx, offset comp_carta_3_cop
     push dx
@@ -560,6 +527,7 @@ ContinuaPC3:
     pop si
     pop di
     ;GENERO CARTA NRO 4 COMPUTADORA
+    call salto
     mov di, offset comp_carta_bit_4       ;Paso offset en donde quiero que guarde la carta
     push di
     call Generador_Carta
@@ -571,51 +539,22 @@ ContinuaPC3:
 
     ;GUARDO EL VALOR DE LAS CARTAS EN OTRA VARIABLE POR ERROR DE SOBRE ESCRITURA
     ;ERROR DE SOBRE ESCRITURA EN FUNCIÓN USER_SUMA borra el contenido del offset que le pasas
-    mov dx, offset comp_carta_1_cop2
-    mov bx, offset comp_carta_1_cop3
-    call copioVariable
-
-    mov dx, offset comp_carta_2_cop2
-    mov bx, offset comp_carta_2_cop3
-    call copioVariable
-
-    mov dx, offset comp_carta_3_cop
-    mov bx, offset comp_carta_3_cop3
-    call copioVariable
-
     mov dx, offset comp_carta_4
-    mov bx, offset comp_carta_4_cop3
+    mov bx, offset comp_carta_4_cop2
     call copioVariable
 
-;PREPARO VARIABLES PARA FUNCION COMPUTER_SUMA
-;NUMERO DE CARTAS DE LA COMPUTADORA QUE VA A SUMAR
-    call salto
-    call salto
-    mov cx,4
-    mov bx, offset comp_carta_1_cop3    ;uso variables copia por que las originales estan rotas
-    push bx
-    mov di, offset comp_carta_2_cop3    ;uso variables copia por que las originales estan rotas
-    push di 
-    mov si, offset comp_carta_3_cop3
-    push si
-    mov dx, offset comp_carta_4_cop3
-    push dx
-    call computer_suma
-    pop dx
-    pop si
-    pop di
-    pop bx
-    
-    push cx                         ;GUARDO EN STACK EL VALOR QUE DEVUELVE USER_SUMA  
+    mov bx, offset comp_carta_4
+    call Acumulador_comp_carta
+    push cx
 
 ;PREPARO VARIABLES DE LAS CARTAS PARA FUNCION IMPR_CARTA
-    mov di, offset comp_carta_1_cop2
+    mov di, offset comp_carta_1_cop
     push di
-    mov si, offset comp_carta_2_cop2
+    mov si, offset comp_carta_2_cop
     push si
     mov dx, offset comp_carta_3_cop
     push dx
-    mov bx, offset comp_carta_4
+    mov bx, offset comp_carta_4_cop2
     push bx
 
     mov bx,4

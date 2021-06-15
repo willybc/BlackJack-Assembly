@@ -24,6 +24,7 @@ public user_suma
 public computer_suma
 public Comparo_ambas_sumas
 public Acumulador_user_carta
+public Acumulador_comp_carta
 
 extrn salto:proc
 extrn regascii2:proc
@@ -189,6 +190,53 @@ ConviertoeImprimo:
     pop bx
     ret
 Acumulador_user_carta endp
+
+Acumulador_comp_carta proc
+    push bx
+    push dx
+    pushf    
+    mov dx, offset bx
+    call asciiareg
+    mov dl,cl
+    push dx
+    
+    mov dx, offset comp_suma_01
+    call asciiareg
+    pop dx
+
+    ;REG CL SUMA ANTERIOR
+    ;REG DL VALOR DE VALOR RECIBIDO
+    add dl, cl
+;HAGO COMPARACION SI PERDIO, GANO O SIGUE JUGANDO
+    xor cx,cx
+    cmp dl, 21
+    je ganaste2
+    jg perdiste2
+    jmp nosePaso2
+nosePaso2:
+    mov cl,0                        ; SI ES MENOR A 21, DEVUELVE 0
+    jmp ConviertoeImprimo2 
+perdiste2:
+    mov cl,1                        ; SI ES MAYOR A 21, DEVUELVE 1
+    jmp ConviertoeImprimo2
+ganaste2:
+    mov cl, 3                       ; SI ES IGUAL A 21, DEVUELVE 3
+    jmp ConviertoeImprimo2
+   
+ConviertoeImprimo2:
+    push cx  
+    mov bx, offset comp_suma_01
+    call regascii2
+
+    mov bx, offset comp_suma_01
+    call Impr_cont_comp
+
+    pop cx
+    popf
+    pop dx
+    pop bx
+    ret
+Acumulador_comp_carta endp
 
 computer_suma proc
     push bp
@@ -389,7 +437,7 @@ Impr_cont_comp proc
     int 21h
 
     mov ah,9
-    mov dx, offset bx
+    mov dx, offset comp_suma_01
     int 21h
 
     mov ah,9
