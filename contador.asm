@@ -10,8 +10,8 @@
     comp_total db "00",24h
     comp_txt2 db " ] :",0dh, 0ah,24h
 
-    user_suma_01 db '0', 0dh, 0ah, 24h
-    comp_suma_01 db '0', 0dh, 0ah, 24h
+    user_suma_01 db '00', 0dh, 0ah, 24h
+    comp_suma_01 db '00', 0dh, 0ah, 24h
 
     txt_user_gana db 'User Win!', 0dh, 0ah, 24h
     txt_comp_gana db 'Computer Win!', 0dh, 0ah, 24h
@@ -31,9 +31,6 @@ extrn regascii2:proc
 extrn asciiareg:proc
 
 user_suma proc
-    push bp
-    mov bp, sp
-
     push ax
     push bx
     push dx
@@ -50,12 +47,12 @@ user_suma proc
     je Sumo4
 
 Sumo2:
-    mov dx, ss:[bp+4]                   ;SUMO CARTA 1
+    mov dx, bx              ;SUMO CARTA 1
     call asciiareg
     mov dl, cl
     push dx
 
-    mov dx, ss:[bp+6]                   ;SUMO CARTA 2
+    mov dx, di                 ;SUMO CARTA 2
     call asciiareg
     pop dx
     add dl, cl
@@ -140,7 +137,6 @@ empiezoConvertir:
     pop dx
     pop bx
     pop ax
-    pop bp
     ret
 user_suma endp
 
@@ -148,9 +144,9 @@ Acumulador_user_carta proc
     push bx
     push dx
     pushf    
-    mov dx, offset bx
+    mov dx, bx
     call asciiareg
-    mov dl,cl
+    mov dl, cl
     push dx
     
     mov dx, offset user_suma_01
@@ -320,7 +316,7 @@ Sumoc4:
 ConviertoC:
     xor cx,cx
 sePasoC?:
-    cmp dh, 21
+    cmp dh, 21;ACA TENDRIA Q COMPARAR CON 17 TMB PARA VER SI SE PLANTA
     je ganasteC
     jg perdisteC
     jmp nosePasoC

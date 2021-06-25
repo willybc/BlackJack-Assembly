@@ -28,13 +28,13 @@ CicloHitOrStand:
     je Espacio
 
     cmp al, 0dh
-    je Enter
+    je Enterr
     jmp CicloHitOrStand
 
 Espacio:                ;HIT PEDIR CARTA
     mov cl,0
     jmp finHitStand
-Enter:                  ;STAND  DEJAR LA MANO
+Enterr:                  ;STAND  DEJAR LA MANO
     mov cl,1
     jmp finHitStand
 

@@ -19,20 +19,13 @@ regascii2 proc
 		xor ax, ax
 
 		mov al, dl
-		mov cl, 100
+		mov cl, 10
 		div cl
 		add al, 30h
 		mov byte ptr [bx], al
 
-		mov al, ah
-		xor ah, ah
-		mov cl, 10
-		div cl
-		add al, 30h
-		mov [bx+1], al
-
 		add ah, 30h
-		mov [bx+2], ah
+		mov [bx+1], ah
 
 		popf
 		;pop dx

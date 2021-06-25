@@ -18,23 +18,19 @@ asciiareg proc
     pushf
 
     mov cx, 0
+    ;sub [bx], 30h
     mov bx, dx
-    sub [bx], 30h
     mov al, [bx]
-    mov dl, 100
-    mul dl
-    add cl, al
-
-    inc bx
-    sub [bx], 30h
-    mov al, [bx]
+    sub al, 30h
     mov dl, 10
     mul dl
     add cl, al
 
     inc bx
-    sub [bx], 30h
-    add cl, [bx]
+    ;sub [bx], 30h
+    mov al, [bx]
+    sub al, 30h
+    add cl, al;[bx]
 
     popf
     ;pop dx

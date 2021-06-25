@@ -1,6 +1,6 @@
 .8086
 .model small
-.stack 100h
+.stack 150h
 ;INTERRUPCION 80h
 ;Antes de ejecutar hay que escribir siguiente codigo en DOS para instalar INTERRUPCIÓN
 
@@ -10,7 +10,7 @@ extrn Impr_cont_player:proc
 extrn user_suma:proc
 extrn Impr_cont_comp:proc
 extrn Impr_carta:proc
-extrn Generador_Carta:proc          ;al llamar la funcion por 2da vez te da el mismo aleatorio
+;extrn Generador_Carta:proc          ;al llamar la funcion por 2da vez te da el mismo aleatorio
 extrn delay:proc
 extrn copioVariable:proc 
 extrn HitOrStand:proc
@@ -18,44 +18,38 @@ extrn computer_suma:proc
 extrn Comparo_ambas_sumas:proc
 extrn Acumulador_user_carta:proc
 extrn Acumulador_comp_carta:proc 
+;nuevas
+extrn haceMazo:proc ;te hace el mazo y lo mezcla
+extrn dameMazo:proc ;te da el mazo
+extrn muevoValor:proc
+extrn dameCarta:proc ;te muevo el valor de la carta a una variable, ascii
 
 extrn regascii2:proc
 extrn asciiareg:proc
 .data
-    user_carta_bit_1 db 0, 0dh, 0ah, 24h
-    user_carta_bit_2 db 0, 0dh, 0ah, 24h
-    user_carta_bit_3 db 0, 0dh, 0ah, 24h
-    user_carta_bit_4 db 0, 0dh, 0ah, 24h
-
-    user_carta_1 db '0', 0dh, 0ah, 24h
-    user_carta_2 db '0', 0dh, 0ah, 24h
-    user_carta_3 db '0', 0dh, 0ah, 24h
-    user_carta_4 db '0', 0dh, 0ah, 24h
-
+;CARTAS TOTALES JUGADAS Y MAZO DE CARTAS YA MEZCLADO
+    carta db 'vvvv', 0dh, 0ah, 24h
+    ncar db 0, 24h
+    cartas db 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx'
+    cartas2 db 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx'
+    cartas3 db 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx'
+    cartas4 db 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 'xxxx', 24h
 ;CARTAS Y COPIAS USER
-    user_carta_1_cop db '0', 0dh, 0ah, 24h
-    user_carta_2_cop db '0', 0dh, 0ah, 24h
-    user_carta_3_cop db '0', 0dh, 0ah, 24h
-    user_carta_4_cop db '0', 0dh, 0ah, 24h    
-    user_carta_4_cop2 db '0', 0dh, 0ah, 24h
+
+
+    user_carta_1 db '00', 24h
+    user_carta_2 db '00', 24h
+    user_carta_3 db '00', 24h
+    user_carta_4 db '00', 24h
+
+
 ;/CARTAS Y COPIAS USER
 
-    comp_carta_bit_1 db 0, 0dh, 0ah, 24h
-    comp_carta_bit_2 db 0, 0dh, 0ah, 24h
-    comp_carta_bit_3 db 0, 0dh, 0ah, 24h
-    comp_carta_bit_4 db 0, 0dh, 0ah, 24h
+    comp_carta_1 db '00', 24h
+    comp_carta_2 db '00', 24h
+    comp_carta_3 db '00', 24h
+    comp_carta_4 db '00', 24h
 
-    comp_carta_1 db '0', 0dh, 0ah, 24h
-    comp_carta_2 db '0', 0dh, 0ah, 24h
-    comp_carta_3 db '0', 0dh, 0ah, 24h
-    comp_carta_4 db '0', 0dh, 0ah, 24h
-
-;CARTAS Y COPIAS COMPUTER
-    comp_carta_1_cop db '0', 0dh, 0ah, 24h
-    comp_carta_2_cop db '0', 0dh, 0ah, 24h
-    comp_carta_3_cop db '0', 0dh, 0ah, 24h
-    comp_carta_4_cop db '0', 0dh, 0ah, 24h
-    comp_carta_4_cop2 db '0', 0dh, 0ah, 24h
 ;/CARTAS Y COPIAS COMPUTER
     variablex db '009', 0dh, 0ah, 24h
 
@@ -67,48 +61,6 @@ extrn asciiareg:proc
     txt_Pause2 db 'Continue <Spacebar>', 0dh, 0ah, 24h
 .code
 
-;FUNCION CREADA POR ERROR AL GENERAR CARTA NRO 2
-generateRandomNumber2 proc
-    push ax
-    push bx
-    push dx
-
-    mov ah,0        
-    int 1ah
-
-    mov ax, dx
-    mov dx,1                ;CAMBIE EL DX A 1 para que de distinto a la primera carta
-    mov bx,10
-    div bx
-
-    mov user_carta_bit_2, dl   ;agarra el divisor de 'dl' y guarda en la variable randomNum
-
-    pop dx
-    pop bx
-    pop ax
-    ret 
-generateRandomNumber2 endp
-
-generateRandomNumber3 proc
-    push ax
-    push bx
-    push dx
-
-    mov ah,0        
-    int 1ah
-
-    mov ax, dx
-    mov dx,1                ;CAMBIE EL DX A 1 para que de distinto a la primera carta
-    mov bx,10
-    div bx
-
-    mov comp_carta_bit_2, dl   ;agarra el divisor de 'dl' y guarda en la variable randomNum
-
-    pop dx
-    pop bx
-    pop ax
-    ret 
-generateRandomNumber3 endp
 
 main proc
     mov ax, @data
@@ -128,60 +80,78 @@ main proc
 
 continua:
     int 80h
-;GENERO CARTA NRO 1
-    mov di, offset user_carta_bit_1       ;Paso offset en donde quiero que guarde la carta
-    push di
-    call Generador_Carta
-    pop di
+;Hago el mazo
+    call haceMazo
+    lea si, cartas
+;Traigo el mazo
+    call dameMazo
+;----------------------
+;pido una carta
+    xor dx, dx
+    mov dl, ncar
+    lea si, cartas
+    add si, dx
+    lea bx, carta
+    call dameCarta
+    add ncar, 4
 
-    mov dl, user_carta_bit_1
-    mov bx, offset user_carta_1
-    call regascii2
+;obtengo el valor de la carta
+    lea si, carta
+    lea bx, user_carta_1
+    call muevoValor
+
+
 
 ;GENERO CARTA NRO 2
     call salto
-    call generateRandomNumber2
 
-    mov dl, user_carta_bit_2
-    mov bx, offset user_carta_2
-    call regascii2
+    xor dx, dx
+    mov dl, ncar
+    lea si, cartas
+    add si, dx
+    lea bx, carta
+    call dameCarta
+    add ncar, 4
 
-;GUARDO EL VALOR DE LAS CARTAS EN OTRA VARIABLE POR ERROR DE SOBRE ESCRITURA
-;ERROR DE SOBRE ESCRITURA EN FUNCIÓN USER_SUMA borra el contenido del offset que le pasas
-    mov dx, offset user_carta_1
-    mov bx, offset user_carta_1_cop
-    call copioVariable
+    lea si, carta
+    lea bx, user_carta_2
+    call muevoValor
 
-    mov dx, offset user_carta_2
-    mov bx, offset user_carta_2_cop
-    call copioVariable
+
+
+    ;call generateRandomNumber2
+
+    ;mov dl, user_carta_bit_2
+    ;mov bx, offset user_carta_2
+    ;call regascii2
+
 
 ;PREPARO VARIABLES PARA FUNCION USER_SUMA
 ;NUMERO DE CARTAS DEL JUGADOR QUE VA A SUMAR
     mov cx,2                      
     mov bx, offset user_carta_1
-    push bx
+    ;push bx
     mov di, offset user_carta_2
-    push di
+    ;push di
     call user_suma
-    pop di
-    pop bx
+    ;pop di ;? 
+    ;pop bx ;? 
 
     push cx                         ;GUARDO EN STACK EL VALOR QUE DEVUELVE USER_SUMA
 ;PREPARO VARIABLES DE LAS CARTAS PARA FUNCION IMPR_CARTA
 ;NUMERO DE CARTAS DEL JUGADOR
     mov bx, 2                       
-    mov di, offset user_carta_1_cop
-    mov si, offset user_carta_2_cop
+    mov di, offset user_carta_1; aca iba cop
+    mov si, offset user_carta_2; aca iba cop
     push di
     push si
     call Impr_carta
-    pop di
-    pop si
+    ;pop si
+    ;pop di
 ;SE HABRA PASADO?, si se paso cl deberia estar en 1
     pop cx                          ;PIDO AL STACK EL VALOR DE CL
     cmp cl,1
-    je Pierdo
+    je Pierdo ;; nunca se pasa en la primera xq lo maximo q puede sumar es 21, si tocaran 2 ases seria 12
     cmp cl,3
     je Gano
     jmp Opc_Hit_Stand
@@ -205,42 +175,43 @@ Opc_Hit_Stand:
     call HitOrStand
     cmp cl, 0
     je pideCarta
-    ;FALTA PROGRAMAR LA OPCION PARA PLANTAR
+    ;                                           #  FALTA PROGRAMAR LA OPCION PARA PLANTAR #
     ;cmp cl,1
-    ;je planta01
-    
+    ;je planta1
+
 pideCarta:
     ; G E N E R A C I O N   C A R T A S   PC #1
     ;Antes de que se genere la 3ra carta se tendra que imprimir las 2 cartas de la PC
     
     ;GENERO CARTA NRO 1 COMPUTADORA
-    mov di, offset comp_carta_bit_1
-    push di
-    call Generador_Carta
-    pop di
+    xor dx, dx
+    mov dl, ncar
+    lea si, cartas
+    add si, dx
+    lea bx, carta
+    call dameCarta
+    add ncar, 4
 
-    mov dl, comp_carta_bit_1
-    mov bx, offset comp_carta_1
-    call regascii2
+    lea si, carta
+    lea bx, comp_carta_1
+    call muevoValor
 
+    ;GENERO CARTA NRO 2 COMPUTADORA
     call salto
-    call generateRandomNumber3
 
-    mov dl, comp_carta_bit_2
-    mov bx, offset comp_carta_2
-    call regascii2
+    xor dx, dx
+    mov dl, ncar
+    lea si, cartas
+    add si, dx
+    lea bx, carta
+    call dameCarta
+    add ncar, 4
 
-    ;GUARDO EL VALOR DE LAS CARTAS EN OTRA VARIABLE POR ERROR DE SOBRE ESCRITURA
-    ;ERROR DE SOBRE ESCRITURA EN FUNCIÓN USER_SUMA borra el contenido del offset que le pasas
-    mov dx, offset comp_carta_1
-    mov bx, offset comp_carta_1_cop
-    call copioVariable
-
-    mov dx, offset comp_carta_2
-    mov bx, offset comp_carta_2_cop
-    call copioVariable
-    ;PREPARO VARIABLES PARA FUNCION USER_SUMA
-    ;NUMERO DE CARTAS DEL JUGADOR QUE VA A SUMAR
+    lea si, carta
+    lea bx, comp_carta_2
+    call muevoValor
+    
+    ;NUMERO DE CARTAS DE LA PC QUE VA A SUMAR
     mov cx,2                      
     mov bx, offset comp_carta_1
     push bx
@@ -251,43 +222,38 @@ pideCarta:
     pop bx
 
     push cx                         ;GUARDO EN STACK EL VALOR QUE DEVUELVE USER_SUMA
-    jmp Impresion_cartas_pc
 
-    ;PREPARO VARIABLES DE LAS CARTAS PARA FUNCION IMPR_CARTA
-    ;NUMERO DE CARTAS DE LA COMPUTADORA
-    Impresion_cartas_pc:
+;PREPARO VARIABLES DE LAS CARTAS PARA FUNCION IMPR_CARTA
+;NUMERO DE CARTAS DE LA COMPUTADORA
     mov bx, 2                       
-    mov di, offset comp_carta_1_cop
-    mov si, offset comp_carta_2_cop
+    mov di, offset comp_carta_1
+    mov si, offset comp_carta_2
     push di
     push si
     call Impr_carta
     pop di
     pop si
-    ;SE HABRA PASADO?, si se paso cl deberia estar en 1
+;SE HABRA PASADO?, si se paso cl deberia estar en 1
     pop cx                          ;PIDO AL STACK EL VALOR DE CL
-
-    ;ME FIJO SI GANO, PERDIO O SI CONTINUA JUGANDO LA PC
-    cmp cl, 1
+    cmp cl,1
     je PierdePC
-    cmp cl, 3
+    cmp cl,3
     je GanaPC
     jmp ContinuaPC
 GanaPC:
     mov ah,9
     mov dx, offset perdiste
     int 21h
+
     mov ax, 4c00h
     int 21h
-
 PierdePC:
-    mov ah, 9
+    mov ah,9
     mov dx, offset ganaste
     int 21h
 
     mov ax, 4c00h
     int 21h
-
 ContinuaPC:
     ;PAUSO HASTA QUE EL USUARIO PRESIONE ESPACIO PARA CONTINUAR EL TURNO DE LA PC
     mov ah,9
@@ -299,28 +265,30 @@ ContinuaPC:
     int 21h
 
     cmp al, 20h
-    je Generacion_3         ;EMPIEZO CON EL SEGUNDO TURNO
+    je Generacion_3             ;EMPIEZO CON EL SEGUNDO TURNO
     jmp cicloPausa
-
+    
     ;SEGUNDO TURNO, se le dara una carta más y se la sumará.
     ;Si es mayor a 21 pierde
     ;Si es menor a 21 tiene la opción de hit o stand
     Generacion_3:
+    int 80h
     ;GENERO CARTA NRO 3
-    int 80h                               ;LIMPIO PANTALLA  
-    mov di, offset user_carta_bit_3       ;Paso offset en donde quiero que guarde la carta
-    push di
-    call Generador_Carta
-    pop di
-    mov dl, user_carta_bit_3
-    mov bx, offset user_carta_3
-    call regascii2
+    ;753
+    xor dx, dx
+    mov dl, ncar
+    lea si, cartas
+    add si, dx
+    lea bx, carta
+    call dameCarta
+    add ncar, 4
+
+    lea si, carta
+    lea bx, user_carta_3
+    call muevoValor
     ;/GENERO CARTA NRO 3
     ;COPIO VARIABLE PORQUE USER_CARTA_3 SE ROMPE EN ACUMULADOR_USER_CARTA
-    call salto
-    mov dx, offset user_carta_3
-    mov bx, offset user_carta_3_cop
-    call copioVariable             
+    call salto          
 
     mov bx, offset user_carta_3
     call Acumulador_user_carta
@@ -328,11 +296,11 @@ ContinuaPC:
 ;PREPARO VARIABLES DE LAS CARTAS PARA FUNCION IMPR_CARTA
 ;NUMERO DE CARTAS DEL JUGADOR
     mov bx,3
-    mov di, offset user_carta_1_cop
+    mov di, offset user_carta_1
     push di
-    mov si, offset user_carta_2_cop
+    mov si, offset user_carta_2
     push si
-    mov dx, offset user_carta_3_cop
+    mov dx, offset user_carta_3; _cop
     push dx
     call Impr_carta
     pop dx
@@ -345,14 +313,14 @@ ContinuaPC:
     cmp cl, 3
     je Gano2
     jmp Opc_Hit_Stand2
-;planta1:
+;planta1:                           ; # FALTA IMPLEMENTAR STAND
     ;je planta2
 Gano2:
     mov ah,9
     mov dx, offset ganaste
     int 21h
 
-    mov ax, 4c00h
+    mov ax, 4c00h ;; hay q hacer q salte al fin y no agregar fines a lo loco
     int 21h
 Pierdo2:
     mov ah,9
@@ -361,32 +329,32 @@ Pierdo2:
 
     mov ax, 4c00h
     int 21h
-;OPCION HIT OR STAND PARA PASAR AL TERCER TURNO O AL TURNO DE LA COMPUTADORA
+;OPCION HIT OR STAND PARA PASAR AL SEGUNDO TURNO O AL TURNO DE LA COMPUTADORA
 Opc_Hit_Stand2:
     call HitOrStand
     cmp cl, 0
     je pideCarta2
-;planta2:
+;planta2:                                                   #FALTA IMPLEMENTAR STAND
     ;cmp cl,1
     ;je planta3
-
 pideCarta2:
     ; G E N E R A C I O N   C A R T A S   PC #2
     ;antes de que se genera la 4ta carta del usuario tendre que mostrar la 3ra carta de la pc
-    mov di, offset comp_carta_bit_3       ;Paso offset en donde quiero que guarde la carta
-    push di
-    call Generador_Carta
-    pop di
+    ;GENERO CARTA NRO 3 COMPUTADORA
+    xor dx, dx
+    mov dl, ncar
+    lea si, cartas
+    add si, dx
+    lea bx, carta
+    call dameCarta
+    add ncar, 4
 
-    mov dl, comp_carta_bit_3
-    mov bx, offset comp_carta_3
-    call regascii2   
+    lea si, carta
+    lea bx, comp_carta_3
+    call muevoValor
     ;/GENERO CARTA NRO 3 COMPUTADORA
     ;COPIO VARIABLE PORQUE USER_CARTA_3 SE ROMPE EN ACUMULADOR_COMP_CARTA
     call salto
-    mov dx, offset comp_carta_3
-    mov bx, offset comp_carta_3_cop
-    call copioVariable   
 
     mov bx, offset comp_carta_3
     call Acumulador_comp_carta
@@ -395,11 +363,11 @@ pideCarta2:
 ;PREPARO VARIABLES DE LAS CARTAS PARA FUNCION IMPR_CARTA
 ;NUMERO DE CARTAS DE LA COMPUTADORA
     mov bx,3
-    mov di, offset comp_carta_1_cop
+    mov di, offset comp_carta_1;_cop
     push di
-    mov si, offset comp_carta_2_cop
+    mov si, offset comp_carta_2;_cop
     push si
-    mov dx, offset comp_carta_3_cop
+    mov dx, offset comp_carta_3;_cop
     push dx
     call Impr_carta
     pop dx
@@ -424,7 +392,7 @@ PierdePC2:
     int 21h
     mov ax, 4c00h
     int 21h
-
+;---------------- F-I-N-A-L-I-Z-A    S-E-G-U-N-D-O    T-U-R-N-O    PC ---------------- 
 ContinuaPC2:
     ;PAUSO HASTA QUE EL USUARIO PRESIONE ESPACIO PARA CONTINUAR EL TURNO DE LA PC
     mov ah,9
@@ -432,11 +400,11 @@ ContinuaPC2:
     int 21h
 
     cicloPausa2:
-    mov ah, 1
-    int 21h
+        mov ah,1
+        int 21h
 
-    cmp al, 20h
-    je Generacion_4
+        cmp al, 20h
+        je Generacion_4
     jmp cicloPausa2
 
     ;TERCER TURNO se la dara una carta más y se la sumará
@@ -446,31 +414,32 @@ ContinuaPC2:
     int 80h
     call salto
     ;GENERO CARTA NRO 4
-    mov di, offset user_carta_bit_4       ;Paso offset en donde quiero que guarde la carta
-    push di
-    call Generador_Carta
-    pop di
+    xor dx, dx
+    mov dl, ncar
+    lea si, cartas
+    add si, dx
+    lea bx, carta
+    call dameCarta
+    add ncar, 4
 
-    mov dl, user_carta_bit_4
-    mov bx, offset user_carta_4
-    call regascii2  
+    lea si, carta
+    lea bx, user_carta_4
+    call muevoValor
+    
     ;/GENERO CARTA NRO 4
-;COPIO VARIABLE PORQUE USER_CARTA_4 SE ROMPE EN ACUMULADOR_USER_CARTA        
-    mov dx, offset user_carta_4
-    mov bx, offset user_carta_4_cop2    ;user_carta_4_cop NO FUNCIONA SE ROMPE PROGRAMA                
-    call copioVariable
+
 
     mov bx, offset user_carta_4
     call Acumulador_user_carta
     push cx
 ;PREPARO VARIABLES DE LAS CARTAS PARA FUNCION IMPR_CARTA
-    mov di, offset user_carta_1_cop
+    mov di, offset user_carta_1;_cop
     push di
-    mov si, offset user_carta_2_cop
+    mov si, offset user_carta_2;_cop
     push si
-    mov dx, offset user_carta_3_cop
+    mov dx, offset user_carta_3;_cop
     push dx
-    mov bx, offset user_carta_4_cop2
+    mov bx, offset user_carta_4;_cop2
     push bx
     mov bx,4
     call Impr_carta
@@ -484,12 +453,26 @@ ContinuaPC2:
     je Pierdo3
     cmp cl,3
     je Gano3
-    jmp ContinuaPC3
+    ;Si no es ninguno de esos 2 valores de arriba entonces ...
+    mov ah, 9
+    mov dx, offset txt_Pause
+    int 21h
+
+    cicloPausa3:
+        mov ah, 1
+        int 21h
+
+        cmp al, 20h
+        je ContinuaPC4           
+    jmp cicloPausa3
+
+;planta3:                       ; # FALTA IMPLEMENTAR STAND
+;    jmp TurnoPC
+;-----------------------------------
 Gano3:
     mov ah,9
     mov dx, offset ganaste
     int 21h
-    
     mov ax, 4c00h
     int 21h
 Pierdo3:
@@ -497,52 +480,36 @@ Pierdo3:
     mov dx, offset perdiste
     int 21h
     mov ax, 4c00h
-    int 21h
-
-ContinuaPC3:
-    ;PAUSO HASTA QUE EL USUARIO PRESIONE ESPACIO PARA CONTINUAR EL TURNO DE LA PC
-    mov ah,9
-    mov dx, offset txt_Pause
-    int 21h
-
-    cicloPausa3:
-    mov ah,1
-    int 21h
-
-    cmp al, 20h
-    je ContinuaPC4         ;EMPIEZO CON EL SEGUNDO TURNO
-    jmp cicloPausa3
-
+    int 21h  
+;-----------------------------------
 ContinuaPC4:
     ; G E N E R A C I O N   C A R T A S   PC #4
     call salto
-    mov di, offset comp_carta_bit_4       ;Paso offset en donde quiero que guarde la carta
-    push di
-    call Generador_Carta
-    pop di
 
-    mov dl, comp_carta_bit_4
-    mov bx, offset comp_carta_4
-    call regascii2
+    xor dx, dx
+    mov dl, ncar
+    lea si, cartas
+    add si, dx
+    lea bx, carta
+    call dameCarta
+    add ncar, 4
 
-    ;GUARDO EL VALOR DE LAS CARTAS EN OTRA VARIABLE POR ERROR DE SOBRE ESCRITURA
-    ;ERROR DE SOBRE ESCRITURA EN FUNCIÓN USER_SUMA borra el contenido del offset que le pasas
-    mov dx, offset comp_carta_4
-    mov bx, offset comp_carta_4_cop2
-    call copioVariable
+    lea si, carta
+    lea bx, comp_carta_4
+    call muevoValor
 
     mov bx, offset comp_carta_4
     call Acumulador_comp_carta
     push cx
 
 ;PREPARO VARIABLES DE LAS CARTAS PARA FUNCION IMPR_CARTA
-    mov di, offset comp_carta_1_cop
+    mov di, offset comp_carta_1;_cop
     push di
-    mov si, offset comp_carta_2_cop
+    mov si, offset comp_carta_2;_cop
     push si
-    mov dx, offset comp_carta_3_cop
+    mov dx, offset comp_carta_3;_cop
     push dx
-    mov bx, offset comp_carta_4_cop2
+    mov bx, offset comp_carta_4;_cop2
     push bx
 
     mov bx,4
