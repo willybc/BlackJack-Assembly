@@ -13,9 +13,9 @@
     user_suma_01 db '00', 24h
     comp_suma_01 db '00', 24h
 
-    txt_user_gana db 'User Win!', 0dh, 0ah, 24h
-    txt_comp_gana db 'Computer Win!', 0dh, 0ah, 24h
-    txt_empate db '                                                           EMPATE :/', 0dh, 0ah, 24h
+    txt_user_gana db '                                                           GANA USUARIO ;)', 0dh, 0ah, 24h
+    txt_comp_gana db '                                                           GANA PC ;)', 0dh, 0ah, 24h
+    txt_empate    db '                                                           EMPATE :/', 0dh, 0ah, 24h
 
 .code
 public Impr_cont_player
@@ -58,7 +58,7 @@ Sumo2:
     add dl, cl
     mov dh, dl
     jmp Convierto
-
+    
 Sumo3:
     mov dx, ss:[bp+4]                   ;SUMO CARTA 1
     call asciiareg

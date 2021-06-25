@@ -46,9 +46,9 @@ extrn asciiareg:proc
 ;MENSAJES DEL PROGRAMA
     ganaste db  '                                                           GANASTE!', 0dh, 0ah, 24h
     perdiste db '                                                           PERDISTE!', 0dh, 0ah, 24h
-    txt_gana_pc db '                                                           GANA PC ;)', 0dh, 0ah, 24h
+    txt_gana_pc   db '                                                           GANA PC ;)', 0dh, 0ah, 24h
     txt_pierde_pc db '                                                           PIERDE PC :(',0dh, 0ah, 24h
-    txt_Pause db '                                               '
+    txt_Pause db '                                                         '
     txt_Pause2 db 'Continue <Spacebar>', 0dh, 0ah, 24h
 .code
 main proc
@@ -144,8 +144,8 @@ Opc_Hit_Stand:
     cmp cl, 0
     je pideCarta
     ;                                           #  FALTA PROGRAMAR LA OPCION PARA PLANTAR #
-    ;cmp cl,1
-    ;je planta1
+    cmp cl,1
+    je planta0
 pideCarta:
     ; G E N E R A C I O N   C A R T A S   PC #1
     ;Antes de que se genere la 3ra carta se tendra que imprimir las 2 cartas de la PC
@@ -195,16 +195,18 @@ pideCarta:
     push di
     push si
     call Impr_carta
-    pop di
     pop si
+    pop di
 ;SE HABRA PASADO?, si se paso cl deberia estar en 1
     pop cx                                                      ;PIDO AL STACK EL VALOR DE CL
     cmp cl,1
-    je PierdePC
+    je PierdePC ; nunca se pasa en la primera xq lo maximo q puede sumar es 21, si tocaran 2 ases seria 12
     cmp cl,3
     je GanaPC
     jmp ContinuaPC
 ;-----------------------------------
+planta0:
+    jmp planta1
 GanaPC:
     mov ah,9
     mov dx, offset perdiste
@@ -273,8 +275,8 @@ ContinuaPC:
     cmp cl, 3
     je Gano2
     jmp Opc_Hit_Stand2
-;planta1:                                                   #  FALTA PROGRAMAR LA OPCION PARA PLANTAR #
-    ;je planta2
+planta1:                                                   ;#  FALTA PROGRAMAR LA OPCION PARA PLANTAR #
+    je planta2
 ;-----------------------------------
 Gano2:
     mov ah,9
@@ -295,13 +297,13 @@ Opc_Hit_Stand2:
     call HitOrStand
     cmp cl, 0
     je pideCarta2
-;planta2:                                                   #  FALTA PROGRAMAR LA OPCION PARA PLANTAR #
-    ;cmp cl,1
-    ;je planta3
+planta2:                                                   ;#  FALTA PROGRAMAR LA OPCION PARA PLANTAR #
+    cmp cl,1
+    je planta3
 pideCarta2:
     ; G E N E R A C I O N   C A R T A S   PC #2
     ;antes de que se genera la 4ta carta del usuario tendre que mostrar la 3ra carta de la pc
-    ;GENERO CARTA NRO 3 COMPUTADORA
+;GENERO CARTA NRO 3 COMPUTADORA
     xor dx, dx
     mov dl, ncar
     lea si, cartas
@@ -313,7 +315,7 @@ pideCarta2:
     lea si, carta
     lea bx, comp_carta_3
     call muevoValor
-    ;/GENERO CARTA NRO 3 COMPUTADORA
+;/GENERO CARTA NRO 3 COMPUTADORA
     ;COPIO VARIABLE PORQUE USER_CARTA_3 SE ROMPE EN ACUMULADOR_COMP_CARTA
     call salto
 
@@ -342,6 +344,8 @@ pideCarta2:
     je GanaPC2
     jmp ContinuaPC2
 ;-----------------------------------
+planta3:
+    jmp planta4
 GanaPC2:
     mov ah,9
     mov dx, offset perdiste
@@ -427,8 +431,8 @@ ContinuaPC2:
         cmp al, 20h
         je ContinuaPC4           
     jmp cicloPausa3
-;planta3:                                                   #  FALTA PROGRAMAR LA OPCION PARA PLANTAR #
-;    jmp TurnoPC
+planta4:                                                   ;#  FALTA PROGRAMAR LA OPCION PARA PLANTAR #
+    jmp planta5
 ;-----------------------------------
 Gano3:
     mov ah,9
@@ -495,6 +499,9 @@ PierdePC3:
     mov dx, offset txt_pierde_pc
     int 21h
     jmp finG
+
+planta5:
+    jmp sePlanto
 ;-----------------------------------
 
 FinalizaPC:
@@ -503,5 +510,171 @@ finG:
     mov ax, 4c00h
     int 21h
 
+sePlanto:
+    ;Genera los turnos de la PC
+    ; G E N E R A C I O N   C A R T A S   PC #1
+    PrimerTurnPC:
+    xor dx, dx
+    mov dl, ncar
+    lea si, cartas
+    add si, dx
+    lea bx, carta
+    call dameCarta
+    add ncar, 4
+
+    lea si, carta
+    lea bx, comp_carta_1
+    call muevoValor
+
+    ;GENERO CARTA NRO 2 COMPUTADORA
+    call salto
+    xor dx, dx
+    mov dl, ncar
+    lea si, cartas
+    add si, dx
+    lea bx, carta
+    call dameCarta
+    add ncar, 4
+
+    lea si, carta
+    lea bx, comp_carta_2
+    call muevoValor
+    
+    ;NUMERO DE CARTAS DE LA PC QUE VA A SUMAR
+    mov cx,2                      
+    mov bx, offset comp_carta_1
+    push bx
+    mov di, offset comp_carta_2
+    push di
+    call computer_suma
+    pop di
+    pop bx
+
+    push cx                                                     ;GUARDO EN STACK EL VALOR QUE DEVUELVE USER_SUMA
+;PREPARO VARIABLES DE LAS CARTAS PARA FUNCION IMPR_CARTA
+;NUMERO DE CARTAS DE LA COMPUTADORA
+    mov bx, 2                       
+    mov di, offset comp_carta_1
+    mov si, offset comp_carta_2
+    push di
+    push si
+    call Impr_carta
+    pop si
+    pop di
+;SE HABRA PASADO?, si se paso cl deberia estar en 1
+    pop cx                                                      ;PIDO AL STACK EL VALOR DE CL
+    cmp cl,1
+    je PierdePC5 ; nunca se pasa en la primera xq lo maximo q puede sumar es 21, si tocaran 2 ases seria 12
+    cmp cl,3
+    je GanaPC5
+    jmp ContinuaPC5
+;-----------------------------------
+GanaPC5:
+    mov ah,9
+    mov dx, offset perdiste
+    int 21h
+    mov ax, 4c00h
+    int 21h
+PierdePC5:
+    mov ah,9
+    mov dx, offset ganaste
+    mov ax, 4c00h
+    int 21h
+;-----------------------------------
+ContinuaPC5:
+    ;PAUSO HASTA QUE EL USUARIO PRESIONE ESPACIO PARA CONTINUAR EL TURNO DE LA PC
+    mov ah,9
+    mov dx, offset txt_Pause
+    int 21h
+
+    cicloPausa5:
+        mov ah,1
+        int 21h
+        cmp al, 20h
+        je Turn_3_PC             ;EMPIEZO CON EL SEGUNDO TURNO DE LA PC
+    jmp cicloPausa5
+
+Turn_3_PC:
+    int 80h
+    call Impr_cont_player
+    call salto
+    ; G E N E R A C I O N   C A R T A S   PC #2
+    ;antes de que se genera la 4ta carta del usuario tendre que mostrar la 3ra carta de la pc
+;GENERO CARTA NRO 3 COMPUTADORA
+    xor dx, dx
+    mov dl, ncar
+    lea si, cartas
+    add si, dx
+    lea bx, carta
+    call dameCarta
+    add ncar, 4
+
+    lea si, carta
+    lea bx, comp_carta_3
+    call muevoValor
+;/GENERO CARTA NRO 3 COMPUTADORA
+    ;COPIO VARIABLE PORQUE USER_CARTA_3 SE ROMPE EN ACUMULADOR_COMP_CARTA
+    call salto
+
+    mov bx, offset comp_carta_3
+    call Acumulador_comp_carta
+    push cx                                                                 ;GUARDO EN STACK EL VALOR QUE DEVUELVE USER_SUMA
+
+;PREPARO VARIABLES DE LAS CARTAS PARA FUNCION IMPR_CARTA
+;NUMERO DE CARTAS DE LA COMPUTADORA
+    mov bx,3
+    mov di, offset comp_carta_1
+    push di
+    mov si, offset comp_carta_2
+    push si
+    mov dx, offset comp_carta_3
+    push dx
+    call Impr_carta
+    pop dx
+    pop si
+    pop di
+;SE HABRA PASADO?, si se paso cl deberia estar en 1
+    pop cx                                                                  ;PIDO AL STACK EL VALOR DE CL
+    cmp cl, 1
+    je PierdePC6
+    cmp cl, 3
+    je GanaPC6
+    jmp ContinuaPC6
+;-----------------------------------
+GanaPC6:
+    mov ah,9
+    mov dx, offset perdiste
+    int 21h
+    mov ax, 4c00h
+    int 21h
+PierdePC6:
+    mov ah,9
+    mov dx, offset ganaste
+    int 21h
+    mov ax, 4c00h
+    int 21h
+;-----------------------------------
+
+;---------------- F-I-N-A-L-I-Z-A    S-E-G-U-N-D-O    T-U-R-N-O    PC ---------------- 
+ContinuaPC6:
+    ;PAUSO HASTA QUE EL USUARIO PRESIONE ESPACIO PARA CONTINUAR EL TURNO DE LA PC
+    mov ah,9
+    mov dx, offset txt_Pause
+    int 21h
+
+    cicloPausa6:
+        mov ah,1
+        int 21h
+
+        cmp al, 20h
+        je FinalizaPC7
+        ;je Turn_4_PC
+    jmp cicloPausa6
+
+FinalizaPC7:
+    call Comparo_ambas_sumas
+    
+    mov ax, 4c00h
+    int 21h
 main endp
 end main
