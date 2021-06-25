@@ -214,7 +214,6 @@ GanaPC:
 PierdePC:
     mov ah,9
     mov dx, offset ganaste
-    int 21h
     mov ax, 4c00h
     int 21h
 ;-----------------------------------
@@ -281,7 +280,7 @@ Gano2:
     mov ah,9
     mov dx, offset ganaste
     int 21h
-    mov ax, 4c00h ; hay q hacer q salte al fin y no agregar fines a lo loco
+    mov ax, 4c00h
     int 21h
 Pierdo2:
     mov ah,9
@@ -435,14 +434,12 @@ Gano3:
     mov ah,9
     mov dx, offset ganaste
     int 21h
-    mov ax, 4c00h
-    int 21h
+    jmp finG
 Pierdo3:
     mov ah,9
     mov dx, offset perdiste
     int 21h
-    mov ax, 4c00h
-    int 21h  
+    jmp finG
 ;-----------------------------------
 ContinuaPC4:
     ; G E N E R A C I O N   C A R T A S   PC #4
@@ -502,7 +499,6 @@ PierdePC3:
 
 FinalizaPC:
     call Comparo_ambas_sumas
-
 finG: 
     mov ax, 4c00h
     int 21h

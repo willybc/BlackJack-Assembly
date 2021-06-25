@@ -9,37 +9,28 @@
     
     car_imp1 db "          |", 0dh, 0ah, 24h
     car_imp2 db "|          ", 24h
-
     car_imp_sym_1 db "|     ",24h
     car_imp_sym_2 db "     |",0dh, 0ah,24h
-
-    ;/Impresion Carta #1
-
     ;Impresion Carta #2
-    car2_ini db "  ________  ________ ",0dh, 0ah, 24h
-    car2_mid db " |        |         |",0dh, 0ah, 24h
-    car2_fin db " |________| ________|",0dh, 0ah, 24h
+    car2_ini db "  ________  _______ ",0dh, 0ah, 24h
+    car2_mid db " |        |        |",0dh, 0ah, 24h
+    car2_fin db " |________| _______|",0dh, 0ah, 24h
 
-    car3_ini db "  ________  ________  ________ ",0dh, 0ah, 24h
-    car3_mid db " |        |         |         | ",0dh, 0ah, 24h
-    car3_fin db " |________| ________| ________|",0dh, 0ah, 24h
+    car3_ini db "  ________  ________  _______ ",0dh, 0ah, 24h
+    car3_mid db " |        |         |        | ",0dh, 0ah, 24h
+    car3_fin db " |________| ________| _______|",0dh, 0ah, 24h
 
-    car4_ini db "  ________  ________  ________ _________ ",0dh, 0ah, 24h
-    car4_mid db " |        |         |         |         |",0dh, 0ah, 24h
-    car4_fin db " |________| ________| ________|_________|",0dh, 0ah, 24h
+    car4_ini db "  ________  ________  ________ ________ ",0dh, 0ah, 24h
+    car4_mid db " |        |         |         |        |",0dh, 0ah, 24h
+    car4_fin db " |________| ________| ________|________|",0dh, 0ah, 24h
 
     imp_cart_00 db " | ",24h
-    imp_cart_01 db "    | ",24h
+    imp_cart_01 db "     | ",24h
     imp_cart_02 db "     |",0dh,0ah, 24h
 
     imp_cart_000 db " | ",24h
     imp_cart_001 db "    | ",24h
     imp_cart_002 db "     |",0dh,0ah, 24h
-
-    imp_cart_0000 db " | ",24h
-    imp_cart_0001 db "    | ",24h
-    imp_cart_0002 db "     |",0dh,0ah, 24h
-    ;/Impresion Carta #2
 .code
 public Impr_carta
 
@@ -122,7 +113,7 @@ cant_4:
     
     Imp_num_c3:
         mov ah,9
-        mov dx, offset imp_cart_000
+        mov dx, offset imp_cart_00
         int 21h
 
         mov ah,9                        ;IMPRIMO NUM 1RA CARTA
@@ -130,7 +121,7 @@ cant_4:
         int 21h
 
         mov ah,9
-        mov dx, offset imp_cart_001
+        mov dx, offset imp_cart_01
         int 21h
 
         mov ah,9                        ;IMPRIMO NUM 2RA CARTA
@@ -142,7 +133,7 @@ cant_4:
         int 21h
 
         mov ah,9
-        mov dx, offset imp_cart_001
+        mov dx, offset imp_cart_01
         int 21h
 
         mov ah,9                        ;IMPRIMO NUM 3DA CARTA
@@ -150,7 +141,7 @@ cant_4:
         int 21h
 
         mov ah,9 
-        mov dx, offset imp_cart_002
+        mov dx, offset imp_cart_02
         int 21h
 
         loop ciclo_3
@@ -173,7 +164,7 @@ cant_4:
 
     Imp_num_c4:
         mov ah,9
-        mov dx, offset imp_cart_0000
+        mov dx, offset imp_cart_00
         int 21h
 
         mov ah,9                        ;IMPRIMO NUM 1RA CARTA
@@ -193,7 +184,7 @@ cant_4:
         int 21h
 
         mov ah,9
-        mov dx, offset imp_cart_0001
+        mov dx, offset imp_cart_01
         int 21h
 
         mov ah,9                        ;IMPRIMO NUM 3RA CARTA
@@ -205,7 +196,7 @@ cant_4:
         int 21h
 
         mov ah,9
-        mov dx, offset imp_cart_0001
+        mov dx, offset imp_cart_01
         int 21h
 
         mov ah,9                        ;IMPRIMO NUM 4DA CARTA
@@ -213,7 +204,7 @@ cant_4:
         int 21h
 
         mov ah,9 
-        mov dx, offset imp_cart_0002
+        mov dx, offset imp_cart_02
         int 21h
 
     loop ciclo_4
