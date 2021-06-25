@@ -10,8 +10,8 @@
     comp_total db "00",24h
     comp_txt2 db " ] :",0dh, 0ah,24h
 
-    user_suma_01 db '00', 0dh, 0ah, 24h
-    comp_suma_01 db '00', 0dh, 0ah, 24h
+    user_suma_01 db '00', 24h
+    comp_suma_01 db '00', 24h
 
     txt_user_gana db 'User Win!', 0dh, 0ah, 24h
     txt_comp_gana db 'Computer Win!', 0dh, 0ah, 24h
