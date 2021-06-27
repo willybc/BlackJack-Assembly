@@ -39,8 +39,9 @@ dameMazo proc
 
     ; pasa el valor del txt a la variable que vino por parametros
     mov cx, 52
-    push cx
+    
     nextWord:
+        push cx
         mov ah, 3fh
         mov bx, word ptr[filehandler]
         mov cx, 4
